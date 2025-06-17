@@ -1,7 +1,24 @@
+<script setup>
+import { ref } from 'vue'
+import { useUserStore } from '../stores/userStore'
+
+const menuOpen = ref(false)
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value
+}
+
+const userStore = useUserStore()
+</script>
+
+
 <template>
   <header class="header">
     <div class="container">
       <div class="logo">🏋️ FitLife</div>
+
+       <div class="user-counter">
+        Clientes registrados: <span class="user-count">{{ userStore.users.length }}</span>
+      </div>
 
       <nav class="nav" :class="{ open: menuOpen }">
         <router-link to="/" class="nav-icon" title="Inicio">
@@ -18,9 +35,10 @@
         </router-link>
 
     
-        <router-link to="/login">
+       <router-link to="/login">
           <button class="cta">Login</button>
         </router-link>
+
       </nav>
 
       <div class="hamburger" @click="toggleMenu">☰</div>
@@ -29,18 +47,6 @@
 </template>
 
 
-<script setu
-
-
-<script setup>
-import { ref } from 'vue'
-
-const menuOpen = ref(false)
-
-function toggleMenu() {
-  menuOpen.value = !menuOpen.value
-}
-</script>
 
 <style scoped>
 .header {
@@ -57,6 +63,7 @@ function toggleMenu() {
   padding: 1rem 2rem;
   max-width: 1200px;
   margin: auto;
+  position: relative;
 }
 .logo {
   font-weight: bold;
@@ -84,6 +91,23 @@ function toggleMenu() {
   display: none;
   font-size: 1.5rem;
   cursor: pointer;
+}
+.user-counter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+.user-count {
+  background: #ff4d4d;
+  color: white;
+  border-radius: 12px;
+  padding: 0.1rem 0.6rem;
+  margin-left: 0.5rem;
+  font-weight: 700;
 }
 
 /* Responsive */

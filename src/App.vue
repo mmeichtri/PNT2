@@ -1,5 +1,9 @@
 <script setup>
 import Header from './components/Header.vue'
+import Sidebar from './components/Sidebar.vue'
+import { useUserStore } from './stores/userStore'
+
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -7,8 +11,6 @@ import Header from './components/Header.vue'
   <main>
     <router-view />
   </main>
-</template>
 
-<style scoped>
-/* tu css */
-</style>
+  <Sidebar />
+</template>

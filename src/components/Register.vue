@@ -2,20 +2,20 @@
 
 .registerPage {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   height: 100vh;
   background-color: #222;
-  padding-top: 8vh;
+  padding-top: 10vh;
 }
 
 .registerContainer {
-  width: fit-content;            
-  max-width: 500px;     
-  padding: 1.5rem 2rem;   
-  border: 1px solid rgba(255,255,255,0.15);
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  background-color: rgba(0,0,0,0.25); 
+  background-color: rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,16 +34,16 @@ span{
 
 
 .btn-register {
-    width: 200px;
-    height: 40px;
-    margin-bottom: 0.5rem;
-    background-color: var(--color-success);
-    color: var(--color-text-light);
-    font-size: 1rem;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
+  width: 200px;
+  height: 40px;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 1rem;
 }
 
 .form-row {
@@ -77,8 +77,8 @@ span{
 
 <template>
   <div class="registerPage">
+    <h1 class="title">Registro</h1>
     <div class="registerContainer">
-      <h2>Registro</h2>
       <form @submit.prevent="registro">
         <div class="form-row">
           <input v-model="nombre" id="Nombre" type="text" placeholder="Nombre" />

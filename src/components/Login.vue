@@ -161,7 +161,7 @@ export default {
         usuarioGuardado.password === this.password
       ) {
         if (usuarioGuardado.rol === 'admin') {
-          this.$router.push('/clients');
+          this.$router.push('/user');
         } else {
           this.$router.push('/routines');
         }

@@ -12,6 +12,9 @@ const logout = () => {
 </script>
 
 <template>
+  <div v-if="userStore.isLoggedIn">
+    <h2>Bienvenido, {{ userStore.loggedUser.nombre }}!</h2>
+  </div>
   <div class="alumno-dashboard">
     <h1>¡Bienvenido!</h1>
     <p>Aquí verás tus alumnos, y su progeso</p>

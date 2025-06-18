@@ -111,48 +111,52 @@ span{
 
 
 <script>
-    export default {
-    data() {
-        return {
-        nombre: '',
-        apellido: '',
-        email: '',
-        password: '',
-        rol: '',
-        submitted: false //indico si fue enviado el formulario
-        };
-    },
-    computed: {
-      checkEmail() {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(this.email); //devuelve true o false si cumple con las condiciones
-      }
-    },
+import { useUserStore } from '../stores/userStore' // ajusta la ruta según tu estructura
+
+export default {
+  data() {
+    return {
+      nombre: '',
+      apellido: '',
+      email: '',
+      password: '',
+      rol: '',
+      submitted: false
+    };
+  },
+  computed: {
+    checkEmail() {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(this.email);
+    }
+  },
   methods: {
-    async registro() {
-       this.submitted = true 
-        if(!this.nombre || !this.apellido || !this.email || !this.password || !this.rol){
-            alert("Completar los datos faltantes!")
-            return
-        } if (!this.checkEmail) {
-           alert("El email no es válido!");
-            return
-        }else{
-          const usuario = {
-              nombre: this.nombre,
-              apellido: this.apellido,
-              email: this.email,
-              password: this.password,
-              rol: this.rol
-            };
-            console.log(this.email)
-            console.log(this.password)
-            localStorage.setItem('usuario', JSON.stringify(usuario));
-            
-            console.log(`Logueando con ${this.email} y ${this.password}`);
-            this.$router.push('/login');
-            }
-        }
-     }
+    registro() {
+      this.submitted = true;
+      if (!this.nombre || !this.apellido || !this.email || !this.password || !this.rol) {
+        alert("Completar los datos faltantes!");
+        return;
+      }
+      if (!this.checkEmail) {
+        alert("El email no es válido!");
+        return;
+      }
+
+      const userStore = useUserStore();
+
+      const nuevoUsuario = {
+        nombre: this.nombre,
+        apellido: this.apellido,
+        email: this.email,
+        password: this.password,
+        rol: this.rol
+      };
+
+      userStore.addUser(nuevoUsuario); // Agrega usuario y guarda en localStorage
+
+      alert('Usuario registrado correctamente');
+      this.$router.push('/login');
+    }
+  }
 };
 </script>

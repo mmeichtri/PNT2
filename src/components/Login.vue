@@ -140,6 +140,8 @@ span{
 </template>
 
 <script>
+import { useUserStore } from '../stores/userStore'
+
 export default {
   data() {
     return {
@@ -148,25 +150,23 @@ export default {
     };
   },
   methods: {
-    async login() {
-      const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
+    login() {
+      const userStore = useUserStore();
+      const usuario = userStore.users.find(
+        u => u.email === this.email && u.password === this.password
+      );
 
-      if (!usuarioGuardado) {
-        alert("No hay usuario registrado.");
+      if (!usuario) {
+        alert("Usuario o contraseña incorrectos.");
         return;
       }
 
-      if (
-        usuarioGuardado.email === this.email &&
-        usuarioGuardado.password === this.password
-      ) {
-        if (usuarioGuardado.rol === 'admin') {
-          this.$router.push('/clients');
-        } else {
-          this.$router.push('/routines');
-        }
+      userStore.login(usuario); // Guarda el usuario logueado en el store
+
+      if (usuario.rol === 'admin') {
+        this.$router.push('/clients');
       } else {
-        alert("Usuario o contraseña incorrectos");
+        this.$router.push('/routines');
       }
     },
 

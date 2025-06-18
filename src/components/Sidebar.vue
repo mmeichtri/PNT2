@@ -7,13 +7,14 @@ const router = useRouter()
 const userStore = useUserStore()
 const sections = ref([
   { id: 1, name: 'Mi perfil', icon: '👤', routeName: 'MiPerfil'},
-  { id: 2, name: 'Mis rutinas', icon: '📋' },
-  { id: 3, name: 'Progreso', icon: '📈' },
-  { id: 4, name: 'Ajustes', icon: '⚙️' },
+   { id: 2, name: 'Calendario', icon: '📅', routeName: 'Clients' },
+  { id: 3, name: 'Mis rutinas', icon: '📋' },
+  { id: 4, name: 'Progreso', icon: '📈' },
+ 
 ])
 
 
-const isCollapsed = ref(false)
+const isCollapsed = ref(true)
 
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value
@@ -21,8 +22,6 @@ function toggleSidebar() {
  function goToRoute(routeName) {
   router.push({ name: routeName })
 }
-
-
 
 
 </script>

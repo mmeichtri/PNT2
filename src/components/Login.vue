@@ -164,9 +164,9 @@ export default {
       userStore.login(usuario); 
 
       if (usuario.rol === 'admin') {
-        this.$router.push('/clients');
+        this.$router.push('/admin');
       } else {
-        this.$router.push('/user');
+        this.$router.push('/clients');
       }
     },
 

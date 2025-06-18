@@ -111,7 +111,7 @@ span{
 
 
 <script>
-import { useUserStore } from '../stores/userStore' // ajusta la ruta según tu estructura
+import { useUserStore } from '../stores/userStore'
 
 export default {
   data() {

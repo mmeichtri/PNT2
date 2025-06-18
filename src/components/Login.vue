@@ -161,12 +161,12 @@ export default {
         return;
       }
 
-      userStore.login(usuario); // Guarda el usuario logueado en el store
+      userStore.login(usuario); 
 
       if (usuario.rol === 'admin') {
         this.$router.push('/clients');
       } else {
-        this.$router.push('/routines');
+        this.$router.push('/user');
       }
     },
 

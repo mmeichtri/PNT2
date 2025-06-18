@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useUserStore } from '../stores/userStore'
+import { useRouter } from 'vue-router'
 
 const menuOpen = ref(false)
 function toggleMenu() {
@@ -8,6 +9,11 @@ function toggleMenu() {
 }
 
 const userStore = useUserStore()
+const router = useRouter()
+
+function logout() {
+  userStore.logout()
+  router.push('/') }
 </script>
 
 
@@ -34,13 +40,10 @@ const userStore = useUserStore()
            <span class="nav-text">Home</span>
         </router-link>
 
+    <router-link v-if="!userStore.isLoggedIn" to="/login">Login</router-link>
+      <button v-else @click="logout">Cerrar sesión</button>
+    </nav>
     
-       <router-link to="/login">
-          <button class="cta">Login</button>
-        </router-link>
-
-      </nav>
-
       <div class="hamburger" @click="toggleMenu">☰</div>
     </div>
   </header>
@@ -109,7 +112,17 @@ const userStore = useUserStore()
   margin-left: 0.5rem;
   font-weight: 700;
 }
-
+button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #c9302c;
+}
 /* Responsive */
 @media (max-width: 768px) {
   .nav {

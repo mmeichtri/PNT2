@@ -7,6 +7,8 @@ import Register from '../components/Register.vue'
 import Result from '../components/Result.vue'
 import User from '../components/User.vue'
 import App from '../App.vue'
+import MiPerfil from '../components/MiPerfil.vue'
+
 
 
 const routes = [
@@ -17,7 +19,12 @@ const routes = [
     { path: '/routines', name: 'Routines', component: Routines},
     { path: '/clients', name: 'Clients', component: Clients},
     { path: '/results', name: 'Result', component: Result},
-    { path: '/user', name: 'User', component: User}
+    { path: '/user', name: 'User', component: User},
+{
+  path: '/miPerfil',  
+  name: 'MiPerfil',
+  component: MiPerfil 
+}
 ]
 
 const router = createRouter({ 

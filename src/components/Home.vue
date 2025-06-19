@@ -2,21 +2,31 @@
   <div class="hero-full">
     <div class="hero-content">
       <router-link
-      v-if="!userStore.loggedUser"
-      to="/login"
-      class="cta-button">Empieza ahora</router-link>
+        v-if="!userStore.loggedUser"
+        to="/login"
+        class="cta-button"
+      >Empieza ahora</router-link>
     </div>
 
-    <!-- SOLO PARA CLIENTES -->
+    <!-- SOLO PARA CLIENTES SIN ENTRENADOR -->
     <div
-      v-if="isCliente"
+      v-if="isCliente && !userStore.loggedUser?.entrenadorAsignado"
       class="seleccion-entrenador-card"
     >
       <h3>💪 Seleccioná tu entrenador</h3>
       <p>Conectate con un profesional que te acompañe en tu proceso.</p>
       <button class="btn-elegir" @click="irASeleccionEntrenador">Elegir entrenador</button>
     </div>
-  </div>
+
+    <!-- SOLO PARA CLIENTES CON ENTRENADOR ASIGNADO -->
+    <div
+      v-if="isCliente && userStore.loggedUser?.entrenadorAsignado"
+      class="entrenador-asignado-card"
+    >
+      <p>¡Ya tienes un entrenador asignado! Si quieres cambiarlo, contacta al soporte.</p>
+    </div>
+    </div>
+
 
   <section class="promo">
     <h2>🏷️ ¡Descuento especial para grupos familiares!</h2>
@@ -36,13 +46,14 @@ const router = useRouter()
 const isCliente = computed(() => userStore.loggedUser?.rol === 'cliente')
 
 function irASeleccionEntrenador() {
-  router.push('/seleccionarEntrenador') // ⚠️ asegurate de tener esta ruta creada
+  router.push('/seleccionarEntrenador')
 }
 </script>
 
+
 <style scoped>
 .hero-full {
-  background-image: url('https://plus.unsplash.com/premium_photo-1663088651100-85eac75d894a?q=80&w=2096&auto=format&fit=crop');
+  background-image: url('https://st4.depositphotos.com/12985848/21976/i/450/depositphotos_219769856-stock-photo-athletic-sportsman-sportswoman-exercising-cube.jpg');
   background-size: cover;
   background-position: center;
   width: 100%;

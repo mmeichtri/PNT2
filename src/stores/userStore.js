@@ -1,4 +1,3 @@
-// stores/userStore.js
 import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('userStore', {
@@ -27,8 +26,7 @@ export const useUserStore = defineStore('userStore', {
         this.users[i] = user
       }
 
-      localStorage.setItem('loggedUser', JSON.stringify(this.loggedUser))
-      localStorage.setItem('users', JSON.stringify(this.users))
+      this._guardarLocalStorage()
     },
 
     logout() {
@@ -37,16 +35,27 @@ export const useUserStore = defineStore('userStore', {
     },
 
     asignarEntrenadorACliente(emailCliente, emailEntrenador) {
-      const cliente = this.users.find(u => u.email === emailCliente)
-      if (cliente) {
-        cliente.entrenadorAsignado = emailEntrenador
-        this.login(cliente)
+      const clienteIndex = this.users.findIndex(u => u.email === emailCliente)
+      if (clienteIndex !== -1) {
+        this.users[clienteIndex].entrenadorAsignado = emailEntrenador
+
+        // Si el cliente asignado es el usuario logueado, actualizo loggedUser también
+        if (this.loggedUser?.email === emailCliente) {
+          this.loggedUser = { ...this.loggedUser, entrenadorAsignado: emailEntrenador }
+        }
+
+        this._guardarLocalStorage()
       }
     },
 
     loadUserFromStorage() {
       this.loggedUser = JSON.parse(localStorage.getItem('loggedUser')) || null
       this.users = JSON.parse(localStorage.getItem('users')) || []
+    },
+
+    _guardarLocalStorage() {
+      localStorage.setItem('loggedUser', JSON.stringify(this.loggedUser))
+      localStorage.setItem('users', JSON.stringify(this.users))
     }
   }
 })

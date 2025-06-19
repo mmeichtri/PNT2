@@ -18,7 +18,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useAlumnosStore } from '../stores/alumnos'
-// import AlumnoCard from './AlumnoCard.vue'
+import AlumnoCard from './AlumnoCard.vue'
 
 const store = useAlumnosStore()
 const cargando = ref(true)

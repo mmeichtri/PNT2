@@ -15,8 +15,7 @@ export const useUserStore = defineStore('userStore', () => {
     }
   }
 
-  const storedLoggedUser = JSON.parse(localStorage.getItem('loggedUser'))
-  const loggedUser = ref(storedLoggedUser || null)
+  const loggedUser = ref(null)
 
   function login(user) {
     loggedUser.value = user
@@ -28,6 +27,13 @@ export const useUserStore = defineStore('userStore', () => {
     localStorage.removeItem('loggedUser')
   }
 
+  function loadUserFromStorage() {
+    const stored = JSON.parse(localStorage.getItem('loggedUser'))
+    if (stored) {
+      loggedUser.value = stored
+    }
+  }
+
   const isLoggedIn = computed(() => loggedUser.value !== null)
 
   return {
@@ -36,6 +42,7 @@ export const useUserStore = defineStore('userStore', () => {
     loggedUser,
     login,
     logout,
-    isLoggedIn
+    isLoggedIn,
+    loadUserFromStorage, // <- ¡esto es lo que te faltaba!
   }
 })

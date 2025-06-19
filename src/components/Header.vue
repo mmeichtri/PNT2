@@ -1,5 +1,6 @@
+
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore'
 
 const menuOpen = ref(false)
@@ -8,45 +9,48 @@ function toggleMenu() {
 }
 
 const userStore = useUserStore()
-</script>
 
+onMounted(() => {
+  userStore.loadUserFromStorage()
+})
+</script>
 
 <template>
   <header class="header">
     <div class="container">
       <div class="logo">🏋️ FitLife</div>
 
-       <div class="user-counter">
+      <div class="user-counter">
         Clientes registrados: <span class="user-count">{{ userStore.users.length }}</span>
       </div>
 
       <nav class="nav" :class="{ open: menuOpen }">
         <router-link to="/" class="nav-icon" title="Inicio">
-          <!-- Ícono SVG de casa -->
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-               class="bi bi-house-fill" viewBox="0 0 16 16">
-            <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646
-                     6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0
-                     0-.5.5v1.293z" />
-            <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5
-                     1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293z" />
+              class="bi bi-house-fill" viewBox="0 0 16 16">
+                  <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646
+                          6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0
+                          0-.5.5v1.293z" />
+                  <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5
+                          1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293z" />
           </svg>
-           <span class="nav-text">Home</span>
         </router-link>
 
-    
-       <router-link to="/login">
-          <button class="cta">Login</button>
-        </router-link>
-
+        <template v-if="userStore.loggedUser">
+          <div class="nav-icon hola-usuario fix-position">
+            <span class="nav-text">Hola, {{ userStore.loggedUser.nombre }}</span>
+            <button class="logout-btn" @click="userStore.logout">Cerrar sesión</button>
+          </div>
+        </template>
+        <template v-else>
+          <router-link to="/login">
+            <button class="cta">Login</button>
+          </router-link>
+        </template>
       </nav>
-
-      <div class="hamburger" @click="toggleMenu">☰</div>
     </div>
   </header>
 </template>
-
-
 
 <style scoped>
 .header {
@@ -56,29 +60,26 @@ const userStore = useUserStore()
   top: 0;
   z-index: 100;
 }
+
 .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  max-width: 1200px;
-  margin: auto;
-  position: relative;
+  gap: 2rem;
 }
-.logo {
-  font-weight: bold;
-  font-size: 1.5rem;
-}
+
 .nav {
   display: flex;
   gap: 1.5rem;
   align-items: center;
 }
+
 .nav a {
   text-decoration: none;
   color: #333;
   font-weight: 500;
 }
+
 .cta {
   background-color: #ff4d4d;
   color: white;
@@ -87,13 +88,14 @@ const userStore = useUserStore()
   border-radius: 4px;
   cursor: pointer;
 }
+
 .hamburger {
   display: none;
   font-size: 1.5rem;
   cursor: pointer;
 }
+
 .user-counter {
-  position: absolute;
   left: 50%;
   transform: translateX(-50%);
   font-weight: 600;
@@ -110,7 +112,22 @@ const userStore = useUserStore()
   font-weight: 700;
 }
 
-/* Responsive */
+.nav-text {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #000;
+}
+
+.hola-usuario {
+  color: #000 !important;
+}
+
+.fix-position {
+  margin-right: 2rem;
+  position: relative;
+  right: 20px;
+}
+
 @media (max-width: 768px) {
   .nav {
     position: absolute;
@@ -123,36 +140,54 @@ const userStore = useUserStore()
     padding: 1rem 2rem;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
+
   .nav.open {
     display: flex;
   }
+
   .hamburger {
     display: block;
   }
+
   .nav-icon {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem; /* espacio entre ícono y texto */
-  color: #333;
-  text-decoration: none;
-}
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #333;
+    text-decoration: none;
+  }
 
-.nav-icon:hover {
-  color: #ff4d4d;
-}
+  .nav-icon.hola-usuario {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
 
-.nav-icon svg {
-  transition: transform 0.2s ease;
-}
+  .logout-btn {
+    background-color: transparent;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, color 0.3s;
+    height: 32px;
+    line-height: 1;
+  }
 
-.nav-icon:hover svg {
-  transform: scale(1.1);
-}
+  .logout-btn:hover {
+    background-color: #ff4d4d;
+    color: white;
+  }
 
-.nav-text {
-  font-weight: 500;
-  font-size: 0.95rem;
-}
+  .nav-icon svg {
+    transition: transform 0.2s ease;
+  }
 
+  .nav-icon:hover svg {
+    transform: scale(1.1);
+  }
 }
 </style>

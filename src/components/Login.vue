@@ -1,3 +1,69 @@
+
+
+
+<script setup>
+import { useUserStore } from '../stores/userStore'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const email = ref('')
+const password = ref('')
+const userStore = useUserStore()
+const router = useRouter()
+
+async function login() {
+  const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'))
+
+  if (!usuarioGuardado) {
+    alert("No hay usuario registrado.")
+    return
+  }
+
+  if (
+    usuarioGuardado.email === email.value &&
+    usuarioGuardado.password === password.value
+  ) {
+    // Actualizo el store para que el header muestre el saludo
+    userStore.login(usuarioGuardado)
+
+    if (usuarioGuardado.rol === 'admin') {
+      router.push('/user')
+    } else {
+      router.push('/routines')
+    }
+  } else {
+    alert("Usuario o contraseña incorrectos")
+  }
+}
+
+function registro() {
+  router.push('/register')
+}
+</script>
+
+<template>
+  <div class="loginPage">
+    <h1 class="title">Hola!</h1>
+    <p class="subtitle">Nos encanta tenerte por aca</p>
+    <div class="loginContainer">
+      <div class="form">
+        <form class="form-group" @submit.prevent="login">
+          <div class="form-group">
+            <input v-model="email" type="email" placeholder="Correo" />
+          </div>
+          <div class="form-group">
+            <input v-model="password" type="password" placeholder="Contraseña" />
+          </div>
+          <div class="form-actions">
+            <button class="btn-login" type="submit">Ingresar</button>
+            <button class="register-link" @click.prevent="registro">Registrarse</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style>
 
 .title{
@@ -59,9 +125,6 @@ input {
     color: #000;
 }
 
-label{
-    margin-bottom: .5em;
-}
 
 span{
     color: var(--color-text-light);
@@ -115,64 +178,3 @@ span{
 
 </style>
 
-<template>
-  
-  <div class="loginPage">
-    <h1 class="title">Hola!</h1>
-    <p class="subtitle">Nos encanta tenerte por aca</p>
-    <div class="loginContainer">
-      <div class="form">
-        <form class="form-group" @submit.prevent="login">
-          <div class="form-group">
-            <input v-model="email" type="email" placeholder="Correo" />
-          </div>
-          <div class="form-group">
-            <input v-model="password" type="password" placeholder="Contraseña" />
-          </div>
-          <div class="form-actions">
-              <button class="btn-login" type="submit">Ingresar</button>
-              <button class="register-link" @click="registro">Registrarse</button>
-          </div>
-        </form>
-        </div>
-      </div>
-  </div>
-</template>
-
-<script>
-export default {
-  data() {
-    return {
-      email: '',
-      password: ''
-    };
-  },
-  methods: {
-    async login() {
-      const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
-
-      if (!usuarioGuardado) {
-        alert("No hay usuario registrado.");
-        return;
-      }
-
-      if (
-        usuarioGuardado.email === this.email &&
-        usuarioGuardado.password === this.password
-      ) {
-        if (usuarioGuardado.rol === 'admin') {
-          this.$router.push('/user');
-        } else {
-          this.$router.push('/routines');
-        }
-      } else {
-        alert("Usuario o contraseña incorrectos");
-      }
-    },
-
-    registro() {
-      this.$router.push('/register');
-    }
-  }
-};
-</script>

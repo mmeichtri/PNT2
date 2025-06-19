@@ -56,12 +56,13 @@ const store = useAlumnosStore()
 // const alumnos = ref()
 
 // Datos de prueba
-const datosPrueba = [
+const datosDePrueba = [
   { id: 1, nombre: 'Juan Pérez' },
   { id: 2, nombre: 'María López' }
 ]
 
-const alumnos = ref([])
+// const alumnos = ref([])
+const alumnos = ref(datosDePrueba)
 
 onMounted(async () => {
   await store.fetchAlumnos()
@@ -69,6 +70,6 @@ onMounted(async () => {
 })
 
 function verAlumno(id) {
-  router.push({ name: 'AlumnoDetalle', params: { id } })
+  router.push({ name: 'AlumnoDetalleView', params: { id } })
 }
 </script>

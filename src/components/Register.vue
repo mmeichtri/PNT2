@@ -1,5 +1,109 @@
-<style>
+<template>
+  <div class="registerPage">
+    <h1 class="title">Registro</h1>
 
+    <div class="registerContainer">
+      <form @submit.prevent="registro">
+        <!-- Nombre -->
+        <div class="form-row">
+          <input v-model="nombre" type="text" placeholder="Nombre" />
+          <span v-if="submitted && !nombre" class="error">*</span>
+        </div>
+
+        <!-- Apellido -->
+        <div class="form-row">
+          <input v-model="apellido" type="text" placeholder="Apellido" />
+          <span v-if="submitted && !apellido" class="error">*</span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-row">
+          <input v-model="email" type="email" placeholder="Correo" />
+          <span v-if="submitted && (!email || !checkEmail)" class="error">*</span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-row">
+          <input v-model="password" type="password" placeholder="Contraseña" />
+          <span v-if="submitted && !password" class="error">*</span>
+        </div>
+
+        <!-- Rol -->
+        <div class="form-row">
+          <select v-model="rol">
+            <option disabled value="">Seleccioná un rol</option>
+            <option value="cliente">Cliente</option>
+            <option value="entrenador">Entrenador</option>
+          </select>
+          <span v-if="submitted && !rol" class="error">*</span>
+        </div>
+
+        <!-- Botón -->
+        <div class="form-actions">
+          <button class="btn-register" type="submit">Registrarse</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
+
+/* ──────── Reactive state ──────── */
+const nombre    = ref('')
+const apellido  = ref('')
+const email     = ref('')
+const password  = ref('')
+const rol       = ref('')
+const submitted = ref(false)
+
+/* ──────── Composables ──────── */
+const router    = useRouter()
+const userStore = useUserStore()
+
+/* ──────── Helpers ──────── */
+const checkEmail = computed(() => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return re.test(email.value)
+})
+
+/* ──────── Actions ──────── */
+function registro () {
+  submitted.value = true
+
+  // Validar campos obligatorios
+  if (!nombre.value || !apellido.value || !email.value || !password.value || !rol.value) {
+    alert('Completar los datos faltantes!')
+    return
+  }
+
+  // Validar formato de email
+  if (!checkEmail.value) {
+    alert('El email no es válido!')
+    return
+  }
+
+  // Crear y guardar el nuevo usuario
+  const nuevoUsuario = {
+    nombre   : nombre.value,
+    apellido : apellido.value,
+    email    : email.value,
+    password : password.value,
+    rol      : rol.value
+  }
+  userStore.addUser(nuevoUsuario)
+
+  // Avisar y redirigir
+  alert('Usuario registrado correctamente')
+  router.push('/login')
+}
+</script>
+
+<style>
+/* === Estilos idénticos a los tuyos (solo copiados) === */
 .registerPage {
   display: flex;
   flex-direction: column;
@@ -8,7 +112,6 @@
   background-color: #222;
   padding-top: 10vh;
 }
-
 .registerContainer {
   width: 100%;
   max-width: 500px;
@@ -20,19 +123,16 @@
   flex-direction: column;
   align-items: center;
 }
-
-span{
-    color: var(--color-text-light);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 5px 15px;
-    border: 1px solid var(--color-text-light);
-    border-radius: 5px;
-    align-self: self-end;
-    margin-bottom: 4rem;
+span {
+  color: var(--color-text-light);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 5px 15px;
+  border: 1px solid var(--color-text-light);
+  border-radius: 5px;
+  align-self: self-end;
+  margin-bottom: 4rem;
 }
-
-
 .btn-register {
   width: 200px;
   height: 40px;
@@ -45,33 +145,20 @@ span{
   font-weight: 500;
   margin-top: 1rem;
 }
-
 .form-row {
   display: grid;
   grid-template-columns: 1fr auto;
   column-gap: 0.5rem;
   align-items: center;
-  width: 100%; 
+  width: 100%;
   margin-bottom: 1rem;
 }
-
-.form-row label {
-  justify-self: end;
-  color: var(--color-text-light);
-}
-
-.form-row input {
-  justify-self: center;
-}
-
-
 .form-row .error {
   color: #e74c3c;
   font-weight: bold;
   margin-left: 0.5rem;
   font-size: 1.2rem;
 }
-
 .form-row select {
   padding: 0.5rem;
   border-radius: 5px;
@@ -83,94 +170,3 @@ span{
   border: 1px solid var(--color-text-light);
 }
 </style>
-
-
-<template>
-  <div class="registerPage">
-    <h1 class="title">Registro</h1>
-    <div class="registerContainer">
-      <form @submit.prevent="registro">
-        <div class="form-row">
-          <input v-model="nombre" id="Nombre" type="text" placeholder="Nombre" />
-          <span v-if="!nombre && submitted" class="error">*</span>
-        </div>
-        <div class="form-row">
-          <input v-model="apellido" id="Apellido" type="text" placeholder="Apellido" />
-          <span v-if="!apellido && submitted" class="error">*</span>
-        </div>
-        <div class="form-row">
-          <input id="Email" v-model="email" type="email" placeholder="Correo" />
-          <span v-if="(!email || !checkEmail) && submitted" class="error">*</span>
-        </div>
-        <div class="form-row">
-          <input v-model="password" id="Password" type="password" placeholder="Contraseña" />
-          <span v-if="submitted && !checkEmail" class="error">*</span>
-        </div>
-        <div class="form-row">
-          <select v-model="rol" id="Rol">
-            <option disabled value="">Seleccioná un rol</option>
-            <option value="cliente">Cliente</option>
-            <option value="entrenador">Entrenador</option>
-          </select>
-          <span v-if="!rol && submitted" class="error">*</span>
-        </div>
-        
-        <div class="form-actions">
-          <button class="btn-register" type="submit">Registrarse</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</template>
-
-
-<script>
-import { useUserStore } from '../stores/userStore'
-
-export default {
-  data() {
-    return {
-      nombre: '',
-      apellido: '',
-      email: '',
-      password: '',
-      rol: '',
-      submitted: false
-    };
-  },
-  computed: {
-    checkEmail() {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(this.email);
-    }
-  },
-  methods: {
-    registro() {
-      this.submitted = true;
-      if (!this.nombre || !this.apellido || !this.email || !this.password || !this.rol) {
-        alert("Completar los datos faltantes!");
-        return;
-      }
-      if (!this.checkEmail) {
-        alert("El email no es válido!");
-        return;
-      }
-
-      const userStore = useUserStore();
-
-      const nuevoUsuario = {
-        nombre: this.nombre,
-        apellido: this.apellido,
-        email: this.email,
-        password: this.password,
-        rol: this.rol
-      };
-
-      userStore.addUser(nuevoUsuario); // Agrega usuario y guarda en localStorage
-
-      alert('Usuario registrado correctamente');
-      this.$router.push('/login');
-    }
-  }
-};
-</script>

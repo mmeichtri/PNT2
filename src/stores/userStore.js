@@ -9,23 +9,40 @@ export const useUserStore = defineStore('userStore', {
   getters: {
     entrenadores: (state) => state.users.filter(u => u.rol === 'entrenador'),
 
-    alumnosDe: (state) => {
-      return (emailEntrenador) =>
-        state.users.filter(u => u.entrenadorAsignado === emailEntrenador)
-    }
+    alumnosDe: (state) => (emailEntrenador) =>
+      state.users.filter(u => u.entrenadorAsignado === emailEntrenador)
   },
 
   actions: {
+    /* ──────── NUEVO MÉTODO ──────── */
+    addUser(nuevoUsuario) {
+      // 1) evitar duplicados por email
+      const existe = this.users.some(u => u.email === nuevoUsuario.email)
+      if (existe) {
+        throw new Error('Ya existe un usuario registrado con ese email')
+      }
+
+      // 2) inicializar campos adicionales
+      this.users.push({
+        ...nuevoUsuario,
+        entrenadorAsignado: null        // todos los clientes arrancan sin entrenador
+      })
+
+      // 3) persistir en localStorage
+      this._guardarLocalStorage()
+
+      return true                       // opcional: indica éxito
+    },
+
+    /* ──────── RESTO DE ACCIONES ──────── */
     login(user) {
       this.loggedUser = user
-
       const i = this.users.findIndex(u => u.email === user.email)
       if (i === -1) {
         this.users.push(user)
       } else {
         this.users[i] = user
       }
-
       this._guardarLocalStorage()
     },
 
@@ -38,12 +55,9 @@ export const useUserStore = defineStore('userStore', {
       const clienteIndex = this.users.findIndex(u => u.email === emailCliente)
       if (clienteIndex !== -1) {
         this.users[clienteIndex].entrenadorAsignado = emailEntrenador
-
-        // Si el cliente asignado es el usuario logueado, actualizo loggedUser también
         if (this.loggedUser?.email === emailCliente) {
           this.loggedUser = { ...this.loggedUser, entrenadorAsignado: emailEntrenador }
         }
-
         this._guardarLocalStorage()
       }
     },

@@ -11,7 +11,7 @@ import AlumnoDetalleView from '../components/AlumnoDetalleView.vue'
 import App from '../App.vue'
 import MiPerfil from '../components/MiPerfil.vue'
 import Admin from '../components/Admin.vue'
-
+import SeleccionarEntrenador from '../components/SeleccionarEntrenador.vue'
 
 
 const routes = [
@@ -26,7 +26,8 @@ const routes = [
     {path: '/miPerfil',  name: 'MiPerfil',component: MiPerfil },
     {path: '/admin',  name: 'Admin',component: Admin },
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
-    {path: '/alumno/:id',name: 'AlumnoDetalleView',component: AlumnoDetalleView}
+    {path: '/alumno/:id',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
+    {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador,}
 ]
 
 const router = createRouter({ 

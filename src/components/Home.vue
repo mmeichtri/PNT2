@@ -53,7 +53,7 @@ function irASeleccionEntrenador() {
 
 <style scoped>
 .hero-full {
-  background-image: url('https://st4.depositphotos.com/12985848/21976/i/450/depositphotos_219769856-stock-photo-athletic-sportsman-sportswoman-exercising-cube.jpg');
+  background-image: url('https://ridyn.com/wp-content/uploads/2021/11/push-up-2264825_960_720.jpg');
   background-size: cover;
   background-position: center;
   width: 100%;

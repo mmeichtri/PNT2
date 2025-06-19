@@ -1,11 +1,10 @@
 <template>
   <div class="hero-full">
     <div class="hero-content">
-      <h1>
-        Bienvenido a <span class="brand-name">FitLife</span>
-      </h1>
-      <p>Tu plataforma para alcanzar tus metas de fitness.</p>
-      <router-link to="/login" class="cta-button">Empieza ahora</router-link>
+      <router-link
+      v-if="!userStore.loggedUser"
+      to="/login"
+      class="cta-button">Empieza ahora</router-link>
     </div>
 
     <!-- SOLO PARA CLIENTES -->

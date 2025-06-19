@@ -41,6 +41,7 @@ onMounted(() => {
           <div class="nav-icon hola-usuario fix-position">
             <span class="nav-text">Hola, {{ userStore.loggedUser.nombre }}</span>
             <button class="logout-btn" @click="userStore.logout">Cerrar sesión</button>
+            
           </div>
         </template>
         <template v-else>

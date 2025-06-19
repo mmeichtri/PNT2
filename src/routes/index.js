@@ -26,7 +26,7 @@ const routes = [
     {path: '/miPerfil',  name: 'MiPerfil',component: MiPerfil },
     {path: '/admin',  name: 'Admin',component: Admin },
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
-    {path: '/alumno/:id',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
+    {path: '/alumno/:email',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
     {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador,}
 ]
 

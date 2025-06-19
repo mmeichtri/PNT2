@@ -1,11 +1,11 @@
 <template>
   <router-link
-    :to="{ name: 'AlumnoDetalle', params: { id: alumno.id } }"
+    :to="{ name: 'AlumnoDetalleView', params: { email: alumno.email } }"
     class="block rounded-xl shadow-lg bg-white hover:shadow-xl transition p-4"
   >
     <header class="flex items-center gap-4 mb-4">
       <img
-        :src="alumno.foto || 'https://i.pravatar.cc/80?u=' + alumno.id"
+        :src="alumno.foto || 'https://i.pravatar.cc/80?u=' + alumno.email"
         alt=""
         class="w-16 h-16 rounded-full object-cover"
       />

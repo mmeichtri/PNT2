@@ -1,48 +1,52 @@
+// stores/userStore.js
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 
-export const useUserStore = defineStore('userStore', () => {
-  const storedUsers = JSON.parse(localStorage.getItem('users')) || []
-  const users = ref(storedUsers)
+export const useUserStore = defineStore('userStore', {
+  state: () => ({
+    users: JSON.parse(localStorage.getItem('users')) || [],
+    loggedUser: JSON.parse(localStorage.getItem('loggedUser')) || null
+  }),
 
-  function addUser(user) {
-    const exists = users.value.find(u => u.email === user.email)
-    if (!exists) {
-      users.value.push(user)
-      localStorage.setItem('users', JSON.stringify(users.value))
-    } else {
-      alert('El usuario ya existe')
+  getters: {
+    entrenadores: (state) => state.users.filter(u => u.rol === 'entrenador'),
+
+    alumnosDe: (state) => {
+      return (emailEntrenador) =>
+        state.users.filter(u => u.entrenadorAsignado === emailEntrenador)
     }
-  }
+  },
 
-  const loggedUser = ref(null)
+  actions: {
+    login(user) {
+      this.loggedUser = user
 
-  function login(user) {
-    loggedUser.value = user
-    localStorage.setItem('loggedUser', JSON.stringify(user))
-  }
+      const i = this.users.findIndex(u => u.email === user.email)
+      if (i === -1) {
+        this.users.push(user)
+      } else {
+        this.users[i] = user
+      }
 
-  function logout() {
-    loggedUser.value = null
-    localStorage.removeItem('loggedUser')
-  }
+      localStorage.setItem('loggedUser', JSON.stringify(this.loggedUser))
+      localStorage.setItem('users', JSON.stringify(this.users))
+    },
 
-  function loadUserFromStorage() {
-    const stored = JSON.parse(localStorage.getItem('loggedUser'))
-    if (stored) {
-      loggedUser.value = stored
+    logout() {
+      this.loggedUser = null
+      localStorage.removeItem('loggedUser')
+    },
+
+    asignarEntrenadorACliente(emailCliente, emailEntrenador) {
+      const cliente = this.users.find(u => u.email === emailCliente)
+      if (cliente) {
+        cliente.entrenadorAsignado = emailEntrenador
+        this.login(cliente)
+      }
+    },
+
+    loadUserFromStorage() {
+      this.loggedUser = JSON.parse(localStorage.getItem('loggedUser')) || null
+      this.users = JSON.parse(localStorage.getItem('users')) || []
     }
-  }
-
-  const isLoggedIn = computed(() => loggedUser.value !== null)
-
-  return {
-    users,
-    addUser,
-    loggedUser,
-    login,
-    logout,
-    isLoggedIn,
-    loadUserFromStorage, // <- ¡esto es lo que te faltaba!
   }
 })

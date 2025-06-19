@@ -14,7 +14,7 @@ img {
 
     <div v-if="cargando" class="text-white">Cargando datos del alumno…</div>
 
-    <div v-else-if="!alumno.id" class="text-gray-400 bg-gray-800 p-6 rounded">
+    <div v-else-if="!alumno?.email" class="text-gray-400 bg-gray-800 p-6 rounded">
       No se encontró el alumno.
     </div>
 
@@ -151,71 +151,40 @@ img {
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAlumnosStore } from '../stores/alumnos'
+import { useUserStore } from '../stores/userStore'
 
-const route = useRoute()
-const store = useAlumnosStore()
+const route    = useRoute()
+const userStore = useUserStore()
 const cargando = ref(true)
 
+/* Siempre inicializamos todas las propiedades que el template usa */
 const alumno = ref({
-  id: null,
-  nombre: '',
-  edad: null,
-  objetivo: '',
-  foto: '',
-  rutina: [],
-  progreso: []
+  email:     '',
+  nombre:    '',
+  edad:      null,
+  objetivo:  '',
+  foto:      '',
+  rutina:    [],   // <–– por defecto arrays vacíos
+  progreso:  []
 })
 
-
-//datos de prueba
-const datosDePrueba = {
-  1: {
-    id: 1,
-    nombre: 'Juan Pérez',
-    edad: 25,
-    objetivo: 'Ganar masa muscular',
-    foto: '',
-    rutina: [
-      { dia: 'Lunes', descripcion: 'Pecho y tríceps' },
-      { dia: 'Miércoles', descripcion: 'Espalda y bíceps' }
-    ],
-    progreso: [
-      { fecha: '2025-06-01', descripcion: 'Aumentó 2kg de músculo' }
-    ]
-  },
-  2: {
-    id: 2,
-    nombre: 'María López',
-    edad: 30,
-    objetivo: 'Perder peso',
-    foto: '',
-    rutina: [],
-    progreso: []
-  }
-}
-
-async function cargarAlumno(id) {
+async function cargarAlumno (email) {
   cargando.value = true
+  await userStore.loadUserFromStorage()
 
-  if (datosDePrueba[id]) {
-    Object.assign(alumno.value, datosDePrueba[id])
-  } else {
-    await store.fetchDetalle(id)
-    Object.assign(alumno.value, store.detalle[id] || {})
-  }
+  const encontrado = userStore.users.find(u => u.email === email)
+
+  /* Si lo encontrás, mezclás con el shape por defecto – así nunca falta una key */
+  alumno.value = encontrado
+    ? { ...alumno.value, ...encontrado }
+    : alumno.value      // mantiene el shape “vacío”
 
   cargando.value = false
 }
 
-onMounted(() => {
-  cargarAlumno(Number(route.params.id))
-})
-
-watch(
-  () => route.params.id,
-  newId => cargarAlumno(Number(newId))
-)
+cargarAlumno(route.params.email)
+watch(() => route.params.email, cargarAlumno)
 </script>
+

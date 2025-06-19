@@ -55,17 +55,21 @@ const form = ref({
 })
 
 function guardar () {
-  const actualizado = {
+  const datosActualizados = {
     ...userStore.loggedUser,
     ...form.value,
     entrenadorAsignado: form.value.entrenador
   }
 
-  userStore.login(actualizado)
-  localStorage.setItem('loggedUser', JSON.stringify(actualizado))
+  userStore.login(datosActualizados)
+
+  userStore.asignarEntrenadorACliente(
+    datosActualizados.email,
+    datosActualizados.entrenadorAsignado
+  )
 
   alert('Datos guardados correctamente ✅')
-  router.push('/user')
+  router.push('/')
 }
 </script>
 

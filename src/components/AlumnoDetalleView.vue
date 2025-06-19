@@ -4,6 +4,19 @@ img {
   border-radius: 50%;
   object-fit: cover;
 }
+
+.addRoutine-link{
+    width: 200px;
+    height: 50;
+    font-size: 1rem;         
+    color: #e74c3c; 
+    border: 1px solid #e74c3c; 
+    border-radius: 5px;
+    padding: 6px 12px; 
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+}
 </style>
 
 <template>
@@ -117,6 +130,13 @@ img {
 
       <section class="mb-8">
         <h2 class="text-2xl font-semibold mb-3">Rutina actual</h2>
+        <div v-if="isTrainer &&  alumno.rutina.length === 0">
+          <button class="addRoutine-link" @click.prevent="asignarRutina">Asignar rutina</button>
+        </div>
+        <div v-if="!isTrainer && alumno.rutina.length === 0" class="text-gray-400">
+            Sin rutina asignada aún.
+        </div>
+
         <ul class="space-y-2">
           <li
             v-for="(ej, i) in alumno.rutina"
@@ -125,9 +145,7 @@ img {
           >
             <strong>{{ ej.dia }}:</strong> {{ ej.descripcion }}
           </li>
-          <li v-if="alumno.rutina.length === 0" class="text-gray-400">
-            Sin rutina asignada aún.
-          </li>
+          
         </ul>
       </section>
 
@@ -151,22 +169,23 @@ img {
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, watch, computed} from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 
-const route    = useRoute()
+const route = useRoute()
 const userStore = useUserStore()
 const cargando = ref(true)
 
-/* Siempre inicializamos todas las propiedades que el template usa */
+const router = useRouter()
+
 const alumno = ref({
   email:     '',
   nombre:    '',
   edad:      null,
   objetivo:  '',
   foto:      '',
-  rutina:    [],   // <–– por defecto arrays vacíos
+  rutina:    [], 
   progreso:  []
 })
 
@@ -176,13 +195,20 @@ async function cargarAlumno (email) {
 
   const encontrado = userStore.users.find(u => u.email === email)
 
-  /* Si lo encontrás, mezclás con el shape por defecto – así nunca falta una key */
   alumno.value = encontrado
     ? { ...alumno.value, ...encontrado }
-    : alumno.value      // mantiene el shape “vacío”
+    : alumno.value  
 
   cargando.value = false
 }
+
+
+function asignarRutina() {
+  router.push(`/asignarRutina/${alumno.value.email}`)
+}
+
+
+const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
 
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)

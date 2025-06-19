@@ -10,8 +10,11 @@ export const useAlumnosStore = defineStore('alumnos', {
     async fetchAlumnos () {
       if (this.lista.length) return
       const { data } = await axios.get('/alumnos')
-      this.lista = data
-    },
+      this.lista = data.map(a => ({
+      rutina: [],
+      entrenadorAsignado: null
+  }))
+},
     async fetchDetalle (id) {
       if (this.detalle[id]) return
       const { data } = await axios.get(`/alumnos/${id}`)

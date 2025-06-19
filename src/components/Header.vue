@@ -14,6 +14,13 @@ const userStore = useUserStore()
 onMounted(() => {
   userStore.loadUserFromStorage()
 })
+
+const router = useRouter()
+
+function logout() {
+  userStore.logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -40,7 +47,7 @@ onMounted(() => {
         <template v-if="userStore.loggedUser">
           <div class="nav-icon hola-usuario fix-position">
             <span class="nav-text">Hola, {{ userStore.loggedUser.nombre }}</span>
-            <button class="logout-btn" @click="userStore.logout">Cerrar sesión</button>
+            <button class="logout-btn" @click="logout">Cerrar sesión</button>
             
           </div>
         </template>

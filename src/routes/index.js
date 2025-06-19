@@ -12,7 +12,7 @@ import App from '../App.vue'
 import MiPerfil from '../components/MiPerfil.vue'
 import Admin from '../components/Admin.vue'
 import SeleccionarEntrenador from '../components/SeleccionarEntrenador.vue'
-
+import AsignarRutina from '../components/AsignarRutina.vue'
 
 const routes = [
     { path: '/', name: 'Home', component: Home},
@@ -27,7 +27,8 @@ const routes = [
     {path: '/admin',  name: 'Admin',component: Admin },
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
     {path: '/alumno/:email',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
-    {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador,}
+    {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador},
+    {path: '/asignarRutina/:email', name: 'AsignarRutina', component: AsignarRutina}
 ]
 
 const router = createRouter({ 

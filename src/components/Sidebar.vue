@@ -1,49 +1,75 @@
 <script setup>
 import { ref } from 'vue'
+import { useUserStore } from '../stores/userStore'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const userStore = useUserStore()
 const sections = ref([
-  { id: 1, name: 'Mi perfil', icon: '👤' },
-  { id: 2, name: 'Mis rutinas', icon: '📋' },
-  { id: 3, name: 'Progreso', icon: '📈' },
-  { id: 4, name: 'Ajustes', icon: '⚙️' },
+  { id: 1, name: 'Mi perfil', icon: '👤', routeName: 'MiPerfil'},
+   { id: 2, name: 'Calendario', icon: '📅', routeName: 'Clients' },
+  { id: 3, name: 'Mis rutinas', icon: '📋' },
+  { id: 4, name: 'Progreso', icon: '📈' },
+ 
 ])
 
 
-const isCollapsed = ref(false)
+const isCollapsed = ref(true)
 
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value
 }
+ function goToRoute(routeName) {
+  router.push({ name: routeName })
+}
+
+
 </script>
 
 <template>
   <div class="sidebar" :class="{ collapsed: isCollapsed }">
-    <button @click="toggleSidebar" class="toggle-button" :aria-label="isCollapsed ? 'Expandir menú' : 'Colapsar menú'">
+    <button 
+      @click="toggleSidebar" 
+      class="toggle-button" 
+      :aria-label="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
+    >
       <span>{{ isCollapsed ? '◀' : '➤' }}</span>
     </button>
 
-   <div v-if="!isCollapsed" class="avatar">
+    <div v-if="!isCollapsed" class="avatar">
       <img src="https://www.pngarts.com/files/3/Avatar-PNG-Pic.png" alt="Avatar" />
     </div>
 
     <transition name="fade">
       <div v-if="!isCollapsed">
-        <div class="user-info">
-          <div class="userName">Fernando Colombo</div>
-          <div class="userType">Cliente</div>
+        <!-- Corrijo el v-if aquí -->
+        <div class="user-info" v-if="userStore.loggedUser">
+          <p>
+            <strong>{{ userStore.loggedUser.nombre }} {{ userStore.loggedUser.apellido }}</strong>
+          </p>
+          <div class="userType">
+            {{ userStore.loggedUser.rol }}
+          </div>
         </div>
         <div class="divider"></div>
       </div>
     </transition>
 
     <ul class="section-list">
-      <li v-for="section in sections" :key="section.id" class="listItemSidebar">
-        <span class="icon">{{ section.icon }}</span>
+ <li 
+      v-for="section in sections" 
+      :key="section.id" 
+      class="listItemSidebar" 
+      @click="goToRoute(section.routeName)" 
+      style="cursor: pointer;"
+    >
+      <span class="icon">{{ section.icon }}</span>
         <span v-if="!isCollapsed" class="section-text">{{ section.name }}</span>
       </li>
     </ul>
   </div>
 </template>
+
 
 
 <style scoped>
@@ -111,15 +137,11 @@ function toggleSidebar() {
 
 
 .user-info {
+    font-size: 1.5rem;
   text-align: center;
   margin-bottom: 1rem;
 }
 
-.userName {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #fff;
-}
 
 .userType {
   font-size: 1.1rem;

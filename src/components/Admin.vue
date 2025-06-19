@@ -1,0 +1,1 @@
+<template><h1>Esto es Admin. Ve 2/ 3 estadisticas</h1></template>

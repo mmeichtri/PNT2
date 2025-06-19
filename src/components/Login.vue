@@ -12,27 +12,23 @@ const userStore = useUserStore()
 const router = useRouter()
 
 async function login() {
-  const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'))
+  const lista = JSON.parse(localStorage.getItem('users')) || []
+
+  const usuarioGuardado = lista.find(
+    u => u.email === email.value && u.password === password.value
+  )
 
   if (!usuarioGuardado) {
-    alert("No hay usuario registrado.")
+    alert("Usuario o contraseña incorrectos.")
     return
   }
 
-  if (
-    usuarioGuardado.email === email.value &&
-    usuarioGuardado.password === password.value
-  ) {
-    // Actualizo el store para que el header muestre el saludo
-    userStore.login(usuarioGuardado)
+  userStore.login(usuarioGuardado)
 
-    if (usuarioGuardado.rol === 'admin') {
-      router.push('/user')
-    } else {
-      router.push('/routines')
-    }
+  if (usuarioGuardado.rol === 'entrenador') {
+    router.push('/user')
   } else {
-    alert("Usuario o contraseña incorrectos")
+    router.push('/routines')
   }
 }
 

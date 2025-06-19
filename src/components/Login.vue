@@ -140,8 +140,6 @@ span{
 </template>
 
 <script>
-import { useUserStore } from '../stores/userStore'
-
 export default {
   data() {
     return {
@@ -150,7 +148,7 @@ export default {
     };
   },
   methods: {
-    login() {
+     login() {
       const userStore = useUserStore();
       const usuario = userStore.users.find(
         u => u.email === this.email && u.password === this.password

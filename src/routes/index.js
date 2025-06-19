@@ -6,6 +6,8 @@ import Clients from '../components/Clients.vue'
 import Register from '../components/Register.vue'
 import Result from '../components/Result.vue'
 import User from '../components/User.vue'
+import AlumnosView from '../components/AlumnosView.vue'
+import AlumnoDetalleView from '../components/AlumnoDetalleView.vue'
 import App from '../App.vue'
 import MiPerfil from '../components/MiPerfil.vue'
 import Admin from '../components/Admin.vue'
@@ -21,8 +23,13 @@ const routes = [
     { path: '/clients', name: 'Clients', component: Clients},
     { path: '/results', name: 'Result', component: Result},
     { path: '/user', name: 'User', component: User},
+
 {path: '/miPerfil',  name: 'MiPerfil',component: MiPerfil },
 {path: '/admin',  name: 'Admin',component: Admin }
+
+    { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
+    {path: '/alumno/:id',name: 'AlumnoDetalle',component: AlumnoDetalleView}
+
 ]
 
 const router = createRouter({ 

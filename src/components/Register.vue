@@ -72,6 +72,16 @@ span{
   font-size: 1.2rem;
 }
 
+.form-row select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 100%;
+  justify-self: center;
+  color: var(--color-text-light);
+  border: 1px solid var(--color-text-light);
+}
 </style>
 
 
@@ -97,7 +107,11 @@ span{
           <span v-if="submitted && !checkEmail" class="error">*</span>
         </div>
         <div class="form-row">
-          <input v-model="rol" id="Rol" type="text" placeholder="Rol" />
+          <select v-model="rol" id="Rol">
+            <option disabled value="">Seleccioná un rol</option>
+            <option value="cliente">Cliente</option>
+            <option value="entrenador">Entrenador</option>
+          </select>
           <span v-if="!rol && submitted" class="error">*</span>
         </div>
         
@@ -111,7 +125,7 @@ span{
 
 
 <script>
-import { useUserStore } from '../stores/userStore' // ajusta la ruta según tu estructura
+import { useUserStore } from '../stores/userStore'
 
 export default {
   data() {

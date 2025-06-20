@@ -14,7 +14,7 @@ const menuItems = computed(() => {
       { name: 'Mis alumnos', route: 'User', icon: '👥', routeName: 'User' },
       { name: 'Rutinas', route: 'Rutinas', icon: '📋', routeName: 'MiPerfil'},
     ]
-  } else if (rol === 'Cliente') {
+  } else if (rol === 'cliente') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
       { name: 'Calendario', route: 'Calendario', icon: '📅', routeName: 'Clients' },

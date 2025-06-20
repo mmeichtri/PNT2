@@ -1,20 +1,35 @@
 <script setup>
-import { ref } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-const sections = ref([
-  { id: 1, name: 'Mi perfil', icon: '👤', routeName: 'MiPerfil'},
-   { id: 2, name: 'Calendario', icon: '📅', routeName: 'Clients' },
-  { id: 3, name: 'Mis rutinas', icon: '📋' },
-  { id: 4, name: 'Progreso', icon: '📈' },
- 
-])
 
+const menuItems = computed(() => {
+  const rol = userStore.loggedUser?.rol
+  if (rol === 'entrenador') {
+    return [
+      { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil'},
+      { name: 'Mis alumnos', route: 'AlumnosView', icon: '👥', routeName: 'Alumnos' },
+      { name: 'Rutinas', route: 'Rutinas', icon: '📋', routeName: 'MiPerfil'},
+    ]
+  } else if (rol === 'Cliente') {
+    return [
+      { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
+      { name: 'Calendario', route: 'Calendario', icon: '📅', routeName: 'Clients' },
+      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'MiPerfil' },
+    ]
+  } else if (rol === 'admin') {
+    return [
+      { name: 'Estadísticas', route: 'Estadísticas', icon: '📊', routeName: 'Admin' },
+      { name: 'Alumnos', route: 'AlumnosView', icon: '👥', routeName: 'AlumnosView' },
+    ]
+  }
+  return []
+})
 
-const isCollapsed = ref(true)
+const isCollapsed = ref(false)
 
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value
@@ -22,8 +37,6 @@ function toggleSidebar() {
  function goToRoute(routeName) {
   router.push({ name: routeName })
 }
-
-
 </script>
 
 <template>
@@ -31,6 +44,7 @@ function toggleSidebar() {
     <button 
       @click="toggleSidebar" 
       class="toggle-button" 
+
       :aria-label="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
     >
       <span>{{ isCollapsed ? '◀' : '➤' }}</span>
@@ -57,14 +71,14 @@ function toggleSidebar() {
 
     <ul class="section-list">
  <li 
-      v-for="section in sections" 
-      :key="section.id" 
-      class="listItemSidebar" 
-      @click="goToRoute(section.routeName)" 
-      style="cursor: pointer;"
-    >
-      <span class="icon">{{ section.icon }}</span>
-        <span v-if="!isCollapsed" class="section-text">{{ section.name }}</span>
+          v-for="(item, index) in menuItems" 
+    :key="index" 
+    class="listItemSidebar" 
+    @click="goToRoute(item.routeName)" 
+    style="cursor: pointer;"
+  >
+    <span class="icon">{{ item.icon }}</span>
+    <span v-if="!isCollapsed" class="section-text">{{ item.name }}</span>
       </li>
     </ul>
   </div>
@@ -128,11 +142,18 @@ function toggleSidebar() {
   overflow: hidden;
   border: 2px solid white;
 }
+
 .avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
+
+.sidebar.collapsed .avatar {
+  display: none;
+}
+
 
 
 

@@ -44,8 +44,8 @@ function verAlumno(email) {
 
 <style scoped>
 .userPage {
-  width: 50dvw;
-  height: 50dvh;
+  width: 100dvw;
+  height: 100dvh;
   padding: 2rem;
   background-color: var(--color-background-dark);
   display: flex;

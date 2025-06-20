@@ -1,10 +1,10 @@
 
-
-
 <script setup>
+import { ref,} from 'vue'
 import { useUserStore } from '../stores/userStore'
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+
 
 const email = ref('')
 const password = ref('')
@@ -12,7 +12,21 @@ const userStore = useUserStore()
 const router = useRouter()
 
 async function login() {
+ const admin = {
+    nombre: 'Admin',
+    apellido: 'Sistema',
+    email: 'admin@admin.com',
+    password: 'admin123',
+    rol: 'admin'
+  }
+
   const lista = JSON.parse(localStorage.getItem('users')) || []
+const existeAdmin = lista.find(u => u.email === admin.email)
+
+if (!existeAdmin) {
+    lista.push(admin)
+    localStorage.setItem('users', JSON.stringify(lista))
+  }
 
   const usuarioGuardado = lista.find(
     u => u.email === email.value && u.password === password.value
@@ -27,8 +41,10 @@ async function login() {
 
   if (usuarioGuardado.rol === 'entrenador') {
     router.push('/user')
+    } else if (usuarioGuardado.rol === 'admin') {
+    router.push('/admin')
   } else {
-    router.push('/routines')
+    router.push('/clients')
   }
 }
 

@@ -4,12 +4,17 @@ import Sidebar from './components/Sidebar.vue'
 import { useUserStore } from './stores/userStore'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { onMounted } from 'vue'
+
 
 const userStore = useUserStore()
 
-
 const route = useRoute()
-const showSidebar = computed(() => route.name === 'User')
+const showSidebar = computed(() => !!userStore.loggedUser)
+onMounted(() => {
+  userStore.loadUserFromStorage()
+})
+
 </script>
 
 <template>
@@ -24,3 +29,4 @@ const showSidebar = computed(() => route.name === 'User')
     </div>
   </div>
 </template>
+

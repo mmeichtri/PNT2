@@ -23,7 +23,6 @@
       </div>
     </div>
     </div>
-      <Sidebar />
   </div>
 </template>
 
@@ -32,7 +31,6 @@ import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
-import Sidebar from '../components/Sidebar.vue'
 
 
 const userStore = useUserStore()
@@ -80,9 +78,10 @@ h1 {
 .calendar, .summary {
   flex: 1 1 300px;
   background: #e0d3d3;
+   color: #ae0101e1; 
   padding: 1.5rem;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(5, 5, 5, 0.934);
 }
 
 

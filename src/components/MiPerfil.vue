@@ -46,9 +46,10 @@ const userStore = useUserStore()
 }
 
 .profile-card {
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
   background: rgba(0,0,0,0.3);
   padding: 2rem;
-  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 500px;

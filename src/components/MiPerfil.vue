@@ -38,15 +38,15 @@ const userStore = useUserStore()
 }
 .profile-container {
   flex: 1;
-    display: flex;
+  display: flex;
   justify-content: center;
   padding: 2rem;
-  background: #f0f2f5;
+  background-color: var(--color-background-dark);
   min-height: 100vh;
 }
 
 .profile-card {
-  background: rgb(228, 147, 147);
+  background: rgba(0,0,0,0.3);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

@@ -28,11 +28,11 @@
     </div>
 
 
-  <section class="promo">
+  <!-- <section class="promo">
     <h2>🏷️ ¡Descuento especial para grupos familiares!</h2>
     <p>Entrena junto a tus seres queridos con <strong>30% de descuento</strong>.</p>
     <router-link to="/login" class="cta-promo">Aprovechar promoción</router-link>
-  </section>
+  </section> -->
 </template>
 
 <script setup>

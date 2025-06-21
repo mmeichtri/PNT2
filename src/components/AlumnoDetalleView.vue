@@ -11,24 +11,19 @@
     </div>
 
     <div v-else class="bg-white rounded-xl shadow p-6">
-      <header class="flex items-center gap-6 mb-6">
-        <div v-if="alumno.foto" class="w-24 h-24 rounded-full overflow-hidden bg-white">
+      <header class="flex flex-col items-center gap-2 mb-6">
+        <div class="w-16 h-16 rounded-full overflow-hidden bg-white">
           <img
-            :src="alumno.foto"
-            alt="foto alumno"
-            class="w-full h-full object-cover"
+            :src="alumno.foto || '/avatar-default.png'"
+            alt="avatar alumno"
+             class="rounded-full overflow-hidden bg-white"
+              style="width: 200px; height: 200px;"
           />
         </div>
-        <div v-else class="w-24 h-24 rounded-full bg-white overflow-hidden" aria-label="avatar alumno" role="img">
-          <!-- SVG de avatar -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" shape-rendering="auto" width="96" height="96" class="block">
-            <!-- ...contenido omitido para brevedad... -->
-          </svg>
-        </div>
 
-        <div>
-          <h1 class="text-3xl font-bold">{{ alumno.nombre }}</h1>
-          <p class="text-gray-600">Edad: {{ alumno.edad }}  años</p>
+        <div class="text-center">
+          <h1 class="text-2xl font-bold">{{ alumno.nombre }}</h1>
+          <p class="text-gray-600">Edad: {{ alumno.edad }} años</p>
           <p class="text-gray-600">Objetivo: {{ alumno.objetivo }}</p>
         </div>
       </header>
@@ -73,18 +68,31 @@
                 </div>
               </div>
 
-              <!-- Checkbox para marcar si hizo la rutina (solo para alumno) -->
-              <div v-if="!isTrainer" class="ml-4 flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  :id="`hecho-${diaRutina.dia}`"
-                  v-model="diaRutina.hecho"
-                  @change="guardarEstadoDia(i)"
-                />
-                <label :for="`hecho-${diaRutina.dia}`" class="text-sm select-none">
-                  {{ diaRutina.hecho ? 'Hecho' : 'No hecho' }}
-                </label>
+              <div class="ml-4 flex items-center gap-2">
+                <template v-if="!isTrainer">
+                  <input
+                    type="checkbox"
+                    :id="`hecho-${diaRutina.dia}`"
+                    v-model="diaRutina.hecho"
+                    @change="guardarEstadoDia(i)"
+                  />
+                  <label :for="`hecho-${diaRutina.dia}`" class="text-sm select-none">
+                    {{ diaRutina.hecho ? 'Hecho' : 'No hecho' }}
+                  </label>
+                </template>
+                <template v-else>
+                  <span
+                    class="text-sm px-2 py-1 rounded font-medium"
+                    :class="{
+                      'bg-green-100 text-green-700': diaRutina.hecho,
+                      'bg-red-100 text-red-600': !diaRutina.hecho
+                    }"
+                  >
+                    {{ diaRutina.hecho ? '✓' : 'X' }}
+                  </span>
+                </template>
               </div>
+
             </li>
           </ul>
         </template>

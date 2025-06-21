@@ -93,6 +93,7 @@ entrenadorConMasClientesActivos: (state) => {
       this.loggedUser = JSON.parse(localStorage.getItem('loggedUser')) || null
       this.users = JSON.parse(localStorage.getItem('users')) || []
     },
+    
 
     _guardarLocalStorage() {
       localStorage.setItem('loggedUser', JSON.stringify(this.loggedUser))

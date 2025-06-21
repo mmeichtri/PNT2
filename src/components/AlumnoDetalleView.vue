@@ -201,7 +201,7 @@ img {
 }
 
 .detalleViewPage {
-  max-width: 700px;
+  max-width: 700px; /* o 600px, lo que necesites */
   width: 100%;
   padding: 2rem;
   border: 1px solid rgba(255,255,255,0.2);
@@ -214,7 +214,7 @@ img {
 
 .volver-btn {
   position: absolute;
-  top: 40px; 
+  top: 40px; /* Antes era 20px */
   left: 20px;
   color: #3b82f6;
   background: rgba(0,0,0,0.3);
@@ -224,4 +224,7 @@ img {
   z-index: 10;
 }
 
+/* .volver-btn:hover {
+  text-decoration: underline;
+} */
 </style>

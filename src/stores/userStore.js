@@ -44,29 +44,24 @@ entrenadorConMasClientesActivos: (state) => {
   },
 
   actions: {
-    /* ──────── NUEVO MÉTODO ──────── */
     addUser(nuevoUsuario) {
-      // 1) evitar duplicados por email
       const existe = this.users.some(u => u.email === nuevoUsuario.email)
       if (existe) {
         throw new Error('Ya existe un usuario registrado con ese email')
       }
 
-      // 2) inicializar campos adicionales
       this.users.push({
         ...nuevoUsuario,
         entrenadorAsignado: null,
         rutinasHechas: 0 ,  
-        rutinas: []     // todos los clientes arrancan sin entrenador
+        rutinas: []  
       })
 
-      // 3) persistir en localStorage
       this._guardarLocalStorage()
 
-      return true                       // opcional: indica éxito
+      return true                      
     },
 
-    /* ──────── RESTO DE ACCIONES ──────── */
     login(user) {
       this.loggedUser = user
       const i = this.users.findIndex(u => u.email === user.email)

@@ -13,7 +13,9 @@
       <p class="role">{{ userStore.loggedUser.rol }}</p>
       <div class="info">
         <p><strong>Email:</strong> {{ userStore.loggedUser.email }}</p>
+        <p><strong>Edad:</strong> {{ userStore.loggedUser.edad }}</p>
         <p><strong>Teléfono:</strong> {{ userStore.loggedUser.telefono || 'No disponible' }}</p>
+        <p><strong>Descripción:</strong> {{ userStore.loggedUser.objetivo }}</p>
       </div>
 </div>
     </div>

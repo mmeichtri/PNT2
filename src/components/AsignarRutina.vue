@@ -212,7 +212,7 @@ function guardarRutinaUnica() {
   gruposSeleccionados.value.forEach(grupo => {
     if (ejerciciosSeleccionados.value[grupo]?.length) {
       nuevaRutina.push({
-        dia: grupo, // usar grupo como identificador temporal
+        dia: grupo,
         descripcion: {
           [grupo]: ejerciciosSeleccionados.value[grupo]
         },

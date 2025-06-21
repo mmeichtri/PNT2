@@ -13,6 +13,7 @@ import MiPerfil from '../components/MiPerfil.vue'
 import Admin from '../components/Admin.vue'
 import SeleccionarEntrenador from '../components/SeleccionarEntrenador.vue'
 import AsignarRutina from '../components/AsignarRutina.vue'
+import ProgresoAlu from '../components/ProgresoAlu.vue'
 
 const routes = [
     { path: '/', name: 'Home', component: Home},
@@ -28,7 +29,8 @@ const routes = [
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
     {path: '/alumno/:email',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
     {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador},
-    {path: '/asignarRutina/:email', name: 'AsignarRutina', component: AsignarRutina}
+    {path: '/asignarRutina/:email', name: 'AsignarRutina', component: AsignarRutina},
+    {path: '/progreso', name: 'ProgresoAlu', component: ProgresoAlu}
 ]
 
 const router = createRouter({ 

@@ -14,11 +14,11 @@ const menuItems = computed(() => {
       { name: 'Mis alumnos', route: 'User', icon: '👥', routeName: 'User' },
       { name: 'Rutinas', route: 'Rutinas', icon: '📋', routeName: 'MiPerfil'},
     ]
-  } else if (rol === 'cliente') {
+  } else if (rol === 'Cliente') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
       { name: 'Calendario', route: 'Calendario', icon: '📅', routeName: 'Clients' },
-      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'MiPerfil' },
+      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'ProgresoAlu' },
     ]
   } else if (rol === 'admin') {
     return [

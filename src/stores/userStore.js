@@ -56,7 +56,8 @@ entrenadorConMasClientesActivos: (state) => {
       this.users.push({
         ...nuevoUsuario,
         entrenadorAsignado: null,
-        rutinasHechas: 0        // todos los clientes arrancan sin entrenador
+        rutinasHechas: 0 ,  
+        rutinas: []     // todos los clientes arrancan sin entrenador
       })
 
       // 3) persistir en localStorage

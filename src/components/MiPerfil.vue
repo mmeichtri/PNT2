@@ -17,14 +17,11 @@
       </div>
 </div>
     </div>
-    <Sidebar/>
-  </div>
-   
+    </div>
 </template>
 
 <script setup>
 import { useUserStore } from '../stores/userStore'
-import Sidebar from './Sidebar.vue';
 
 const userStore = useUserStore()
 

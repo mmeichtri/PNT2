@@ -1,23 +1,20 @@
 <template>
-  <section class="container mx-auto py-8">
-    <button @click="$router.back()" class="mb-4 text-blue-500 hover:underline">
-      ← Volver
-    </button>
-
+  <button @click="$router.back()" class="volver-btn">← Volver</button>
+  <section class="detalleViewContainer">
     <div v-if="cargando" class="text-white">Cargando datos del alumno…</div>
 
     <div v-else-if="!alumno?.email" class="text-gray-400 bg-gray-800 p-6 rounded">
       No se encontró el alumno.
     </div>
 
-    <div v-else class="bg-white rounded-xl shadow p-6">
+    <div v-else class="detalleViewPage">
       <header class="flex flex-col items-center gap-2 mb-6">
         <div class="w-16 h-16 rounded-full overflow-hidden bg-white">
           <img
             :src="alumno.foto || '/avatar-default.png'"
             alt="avatar alumno"
-             class="rounded-full overflow-hidden bg-white"
-              style="width: 200px; height: 200px;"
+            class="rounded-full overflow-hidden bg-white"
+            style="width: 200px; height: 200px;"
           />
         </div>
 
@@ -29,58 +26,31 @@
       </header>
 
       <section class="mb-8">
-        <h2 class="text-2xl font-semibold mb-3">Rutina actual</h2>
-
-        <template v-if="!tieneRutina">
-          <div v-if="isTrainer">
-            <button class="addRoutine-link" @click.prevent="asignarRutina">
-              Asignar rutina
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
+          <template v-if="isTrainer">
+            <button class="addRoutine-link text-sm w-auto h-auto px-4 py-2" @click.prevent="asignarRutina">
+              {{ alumno.rutina?.length ? 'Modificar rutina' : 'Asignar rutina' }}
             </button>
-          </div>
-          <div v-else class="text-gray-400">
+          </template>
+        </div>
+
+        <template v-if="!alumno.rutina || alumno.rutina.length === 0">
+          <div v-if="!isTrainer" class="text-gray-400 mt-4">
             Sin rutina asignada aún.
           </div>
         </template>
 
         <template v-else>
-          <div v-if="isTrainer" class="mb-3">
-            <button class="addRoutine-link" @click.prevent="asignarRutina">
-              Modificar rutina
-            </button>
-          </div>
-
-          <ul class="space-y-2">
-            <li
-              v-for="(diaRutina, i) in alumno.rutina"
-              :key="i"
-              class="p-3 bg-gray-50 rounded border flex items-center justify-between"
-            >
-              <div>
-                <strong>{{ diaRutina.dia }}:</strong>
-                <div class="ml-2 mt-1 space-y-1">
-                  <div
-                    v-for="(ejercicios, grupo) in diaRutina.descripcion"
-                    :key="grupo"
-                    class="text-sm"
-                  >
-                    <em class="capitalize">{{ grupo }}:</em> {{ ejercicios.join(', ') }}
-                  </div>
+          <ul class="space-y-3">
+            <li v-for="(diaRutina, index) in alumno.rutina" :key="index" class="border p-3 rounded bg-gray-50">
+              <div class="flex justify-between items-center mb-1">
+                <div>
+                  <span class="font-semibold">{{ diaRutina.dia }}:</span>
+                  <span class="text-gray-500 text-sm">{{ diaRutina.fecha || '-' }}</span>
                 </div>
-              </div>
 
-              <div class="ml-4 flex items-center gap-2">
-                <template v-if="!isTrainer">
-                  <input
-                    type="checkbox"
-                    :id="`hecho-${diaRutina.dia}`"
-                    v-model="diaRutina.hecho"
-                    @change="guardarEstadoDia(i)"
-                  />
-                  <label :for="`hecho-${diaRutina.dia}`" class="text-sm select-none">
-                    {{ diaRutina.hecho ? 'Hecho' : 'No hecho' }}
-                  </label>
-                </template>
-                <template v-else>
+                <div v-if="isTrainer">
                   <span
                     class="text-sm px-2 py-1 rounded font-medium"
                     :class="{
@@ -90,15 +60,36 @@
                   >
                     {{ diaRutina.hecho ? '✓' : 'X' }}
                   </span>
-                </template>
+                </div>
+
+                <div v-else>
+                  <input
+                    type="checkbox"
+                    :id="`hecho-${diaRutina.dia}`"
+                    v-model="diaRutina.hecho"
+                    @change="guardarEstadoDia(index)"
+                  />
+                  <label :for="`hecho-${diaRutina.dia}`" class="text-sm select-none ml-1">
+                    {{ diaRutina.hecho ? 'Hecho' : 'No hecho' }}
+                  </label>
+                </div>
               </div>
 
+              <div v-if="diaRutina.descripcion" class="ml-2 mt-1 space-y-1">
+                <div
+                  v-for="(ejercicios, grupo) in diaRutina.descripcion"
+                  :key="grupo"
+                  class="text-sm"
+                >
+                  <em class="capitalize">{{ grupo }}:</em> {{ ejercicios.join(', ') }}
+                </div>
+              </div>
             </li>
           </ul>
         </template>
       </section>
 
-      <section>
+      <section class="mt-8">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
         <ul class="space-y-2">
           <li
@@ -142,16 +133,14 @@ async function cargarAlumno(email) {
   await userStore.loadUserFromStorage()
 
   const encontrado = userStore.users.find(u => u.email === email)
-  if(encontrado){
-    // Aseguramos que cada día tenga la propiedad 'hecho'
+  if (encontrado) {
     encontrado.rutina.forEach(dia => {
       if (dia.hecho === undefined) dia.hecho = false
     })
     alumno.value = { ...alumno.value, ...encontrado }
-  }else{
+  } else {
     alumno.value = { email: '', nombre: '', edad: null, objetivo: '', foto: '', rutina: [], progreso: [] }
   }
-
   cargando.value = false
 }
 
@@ -160,16 +149,14 @@ function asignarRutina() {
 }
 
 function guardarEstadoDia(indice) {
-  // Guardar la actualización en el store y localStorage
   const idxUser = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (idxUser !== -1) {
     userStore.users[idxUser] = { ...alumno.value }
-    userStore._guardarLocalStorage()  // Ajustá según tu método real para guardar
+    userStore._guardarLocalStorage()
   }
 }
 
 const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
-const tieneRutina = computed(() => alumno.value.rutina && alumno.value.rutina.length > 0)
 
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)
@@ -200,4 +187,44 @@ img {
   background: #e74c3c;
   color: #fff;
 }
+
+.detalleViewContainer {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: var(--color-background-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 6vh;
+}
+
+.detalleViewPage {
+  max-width: 700px; /* o 600px, lo que necesites */
+  width: 100%;
+  padding: 2rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.volver-btn {
+  position: absolute;
+  top: 40px; /* Antes era 20px */
+  left: 20px;
+  color: #3b82f6;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* .volver-btn:hover {
+  text-decoration: underline;
+} */
 </style>

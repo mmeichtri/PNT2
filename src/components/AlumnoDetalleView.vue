@@ -86,20 +86,31 @@
 
       <!-- ░░░ PROGRESO ░░░ -->
       <section class="mt-10 w-full">
-        <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
-        <ul class="space-y-2">
-          <li
-            v-for="(item, i) in alumno.progreso"
-            :key="i"
-            class="p-3 border-l-4 border-green-500 bg-green-50 rounded"
-          >
-            {{ item.fecha }} – {{ item.descripcion }}
-          </li>
-          <li v-if="alumno.progreso.length === 0" class="text-gray-400">
-            Aún no hay registros de progreso.
-          </li>
-        </ul>
-      </section>
+      <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
+
+      <div v-if="alumno.rutina.length" class="mb-4">
+        <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
+          <div
+            class="bg-green-400 h-full transition-all duration-500 ease-in-out"
+            :style="{ width: porcentajeProgreso + '%' }"
+          ></div>
+        </div>
+        <p class="text-sm mt-1 text-gray-300">{{ porcentajeProgreso }}% completado</p>
+      </div>
+
+      <ul class="space-y-2">
+        <li
+          v-for="(item, i) in alumno.progreso"
+          :key="i"
+          class="p-3 border-l-4 border-green-500 bg-green-50 rounded"
+        >
+          {{ item.fecha }} – {{ item.descripcion }}
+        </li>
+        <li v-if="alumno.progreso.length === 0" class="text-gray-400">
+          Aún no hay registros de progreso.
+        </li>
+      </ul>
+    </section>
     </div>
   </section>
 </template>
@@ -202,6 +213,14 @@ function guardarEstadoDia(idx) {
 }
 
 const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
+
+
+const porcentajeProgreso = computed(() => {
+  const total = alumno.value.rutina.length
+  if (!total) return 0
+  const completados = alumno.value.rutina.filter(d => d.hecho).length
+  return Math.round((completados / total) * 100)
+})
 
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)
@@ -371,4 +390,17 @@ watch(() => route.params.email, cargarAlumno)
   gap: 6px;
   font-size: 0.85rem;
 }
+
+.progress-bar {
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: #1f2937; 
+  overflow: hidden;
+}
+.progress-bar-fill {
+  background-color: #34d399; 
+  height: 100%;
+  transition: width 0.4s ease-in-out;
+}
+
 </style>

@@ -22,7 +22,7 @@
           <button class="btn-modificar"  @click="modificar" type="submit">Modificar</button>
           <button class="btn-eliminar"  @click="eliminarUsuario" type="submit">Eliminar usuario</button>
       </div>
-</div>
+    </div>
     </div>
     </div>
 </template>

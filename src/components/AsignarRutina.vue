@@ -5,9 +5,7 @@
     </h1>
 
     <div class="flex flex-col md:flex-row gap-10">
-      <!-- ===================== FORM PRINCIPAL ===================== -->
       <form class="flex-1 space-y-10">
-        <!-- ============ BLOQUE POR DÍA ============ -->
         <div
           v-for="dia in diasSemana"
           :key="dia"
@@ -17,19 +15,6 @@
 
           <div v-if="rutinaGuardada[dia]" class="text-green-400 text-sm mb-4">
             ✅ Rutina asignada para {{ dia }}
-          </div>
-
-          <div
-            v-if="resumenDia(dia).length && !rutinaGuardada[dia]"
-            class="mb-4"
-          >
-            <button
-              type="button"
-              class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-              @click="guardarRutinaDia(dia)"
-            >
-              Guardar rutina de {{ dia }}
-            </button>
           </div>
 
           <div v-if="resumenDia(dia).length" class="mb-4 space-y-1">
@@ -65,7 +50,6 @@
             </select>
           </template>
 
-          <!-- BLOQUES POR GRUPO -->
           <div
             v-for="grupo in gruposPorDia[dia]"
             :key="grupo"
@@ -136,11 +120,21 @@
             </ul>
           </div>
         </div>
+
+        <div v-if="diasPendientes.length" class="text-right">
+          <button
+            type="button"
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+            @click="guardarTodo"
+          >
+            Guardar {{ diasPendientes.length === 1 ? 'rutina pendiente' : 'todas las rutinas pendientes' }}
+          </button>
+        </div>
       </form>
 
       <button
         type="button"
-        class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+        class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm self-start"
         @click="volverVistaAlumno"
       >
         Volver
@@ -149,8 +143,9 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
@@ -270,6 +265,15 @@ function resumenDia(dia) {
     grupo,
     ejercicios: ejerciciosSeleccionados.value[dia][grupo]
   }))
+}
+
+const diasPendientes = computed(() =>
+  diasSemana.filter(d => resumenDia(d).length && !rutinaGuardada.value[d])
+)
+
+function guardarTodo () {
+  diasPendientes.value.forEach(d => guardarRutinaDia(d))
+  router.push(`/alumno/${alumno.value.email}`)
 }
 
 function guardarRutinaDia(dia) {

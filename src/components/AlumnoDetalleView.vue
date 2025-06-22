@@ -35,10 +35,21 @@
                 </template>
 
                 <template v-if="isTrainer">
-                  <button class="addRoutine-link" @click="asignarRutina">
+                  <button
+                    class="addRoutine-link"
+                    @click="alumno.rutina?.length ? modificarRutinaDia() : asignarRutina()"
+                  >
                     {{ alumno.rutina?.length ? 'Modificar rutina' : 'Asignar rutina' }}
                   </button>
                 </template>
+
+                <span
+                  v-if="diaSeleccionado"
+                  class="estado-pill"
+                  :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
+                >
+                  {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
+                </span>
               </div>
             </div>
         </div>
@@ -61,34 +72,23 @@
               </button>
             </li>
           </ul>
-
-          <div v-if="diaSeleccionado" class="dia-detalle-card">
-            <header class="dia-detalle-header">
-              <h3 class="capitalize">{{ diaSeleccionado.dia }}</h3>
-              <span
-                class="estado-pill"
-                :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
-              >
-                {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
-              </span>
-            </header>
-
-            <ul v-if="diaSeleccionado.descripcion" class="grupo-lista">
-              <li v-for="(ejercicios, grupo) in diaSeleccionado.descripcion" :key="grupo">
-                <strong class="capitalize">{{ grupo }}:</strong> {{ ejercicios.join(', ') }}
-              </li>
-            </ul>
+          
+          <div v-if="diaSeleccionado" class="flex items-center gap-3">
+            <span
+              class="estado-pill"
+              :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
+            >
+              {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
+            </span>
 
             <div class="checkbox-wrapper" v-if="!isTrainer">
               <input
                 type="checkbox"
-                :id="`hecho-${diaSeleccionado.dia}`"
+                :id="`hecho-header-${diaSeleccionado.dia}`"
                 v-model="diaSeleccionado.hecho"
                 @change="guardarEstadoDia(selectedDiaIndex)"
               />
-              <label :for="`hecho-${diaSeleccionado.dia}`">
-                Marcar como completado
-              </label>
+              <label :for="`hecho-header-${diaSeleccionado.dia}`">Marcar como completado</label>
             </div>
           </div>
         </div>
@@ -156,6 +156,14 @@ function formatearFecha(fechaISO) {
   return fecha.getDate().toString().padStart(2, '0')
 }
 
+function asignarRutina() {
+  router.push(`/asignarRutina/${alumno.value.email}`)
+}
+
+function modificarRutinaDia() {
+  router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
+}
+
 async function cargarAlumno(email) {
   cargando.value = true
   await userStore.loadUserFromStorage()
@@ -207,10 +215,6 @@ function abreviarDia(diaTexto) {
   return dias[diaTexto.toLowerCase()] || diaTexto.slice(0, 3)
 }
 
-function asignarRutina() {
-  router.push(`/asignarRutina/${alumno.value.email}`)
-}
-
 function guardarEstadoDia(idx) {
   const userIdx = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (userIdx !== -1) {
@@ -230,7 +234,7 @@ const porcentajeProgreso = computed(() => {
 })
 
 function verRutina () {
-  router.push(`/verRutina/${alumno.value.email}`)
+  router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 
 cargarAlumno(route.params.email)

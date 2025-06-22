@@ -1,51 +1,58 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 
 const alumno = ref(null)
+const diaSeleccionado = ref(null)
 const cargando = ref(true)
 
+/*  grupo → objEjercicios  */
 const datosGrupo = reactive({})
 
 async function fetchGrupo (grupo) {
-  if (datosGrupo[grupo]) return          
+  if (datosGrupo[grupo]) return
   try {
     const { data } = await axios.get(
       `https://www.mockachino.com/97e84d8a-f013-43/musculos/${encodeURIComponent(grupo)}`
     )
     const obj =
-      Array.isArray(data) ? {} :              // (no esperamos array aquí)
+      Array.isArray(data) ? {} :
       data.ejercicios ? data.ejercicios[0] :
       data
     datosGrupo[grupo] = obj || {}
   } catch (err) {
-    console.error(`Error al obtener grupo ${grupo}`, err)
+    console.error(`Error grupo ${grupo}`, err)
     datosGrupo[grupo] = {}
   }
 }
+
 async function cargar () {
   await userStore.loadUserFromStorage()
   alumno.value = userStore.users.find(u => u.email === route.params.email)
   if (!alumno.value) return
 
-  const grupos = new Set()
-  alumno.value.rutina.forEach(dia => {
-    Object.keys(dia.descripcion || {}).forEach(g => grupos.add(g))
-  })
-  await Promise.all([...grupos].map(fetchGrupo))
+  const idx = Number(route.params.diaIdx)
+  diaSeleccionado.value = alumno.value.rutina[idx]
+
+  if (!diaSeleccionado.value) return
+
+  /* bajar los grupos de este día únicamente */
+  const grupos = Object.keys(diaSeleccionado.value.descripcion || {})
+  await Promise.all(grupos.map(fetchGrupo))
+
   cargando.value = false
 }
 
 onMounted(cargar)
+
 function abreviarDia (d) {
-  const map = { lunes:'Lun', martes:'Mar', miércoles:'Mie', jueves:'Jue', viernes:'Vie', sábado:'Sab', domingo:'Dom' }
-  return map[d.toLowerCase()] || d.slice(0,3)
+  const m = { lunes:'Lun', martes:'Mar', miércoles:'Mie', jueves:'Jue', viernes:'Vie', sábado:'Sab', domingo:'Dom' }
+  return m[d.toLowerCase()] || d.slice(0,3)
 }
 </script>
 
@@ -55,41 +62,37 @@ function abreviarDia (d) {
   <section class="detalleViewContainer">
     <div v-if="cargando" class="text-white">Cargando rutina…</div>
 
-    <div v-else-if="!alumno" class="text-red-400">Alumno no encontrado.</div>
+    <div v-else-if="!alumno || !diaSeleccionado" class="text-red-400">
+      No se pudo cargar la rutina del día.
+    </div>
 
     <div v-else class="detalleViewPage">
       <h1 class="text-2xl font-bold mb-6 text-center">
-        Rutina completa de {{ alumno.nombre }}
+        Rutina de {{ alumno.nombre }} – {{ abreviarDia(diaSeleccionado.dia) }}
       </h1>
 
-      <div v-for="dia in alumno.rutina" :key="dia.dia" class="mb-8">
-        <h2 class="text-xl font-semibold mb-4">
-          {{ abreviarDia(dia.dia) }} – {{ dia.diaNumero || '--' }}
-        </h2>
+      <div
+        v-for="(ejercicios, grupo) in diaSeleccionado.descripcion"
+        :key="grupo"
+        class="mb-8"
+      >
+        <h3 class="font-medium capitalize mb-3">{{ grupo }}</h3>
 
-        <div
-          v-for="(ejercicios, grupo) in dia.descripcion"
-          :key="grupo"
-          class="mb-6"
-        >
-          <h3 class="font-medium capitalize mb-3">{{ grupo }}</h3>
-
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="ej in ejercicios"
-              :key="ej"
-              class="ej-card"
-            >
-              <img
-                :src="datosGrupo[grupo]?.[ej]?.img || '/placeholder.png'"
-                alt="img ejercicio"
-                class="ej-img"
-              />
-              <h4 class="ej-title">{{ ej }}</h4>
-              <p class="ej-desc">
-                {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
-              </p>
-            </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="ej in ejercicios"
+            :key="ej"
+            class="ej-card"
+          >
+            <img
+              :src="datosGrupo[grupo]?.[ej]?.img || '/placeholder.png'"
+              alt="img ejercicio"
+              class="ej-img"
+            />
+            <h4 class="ej-title">{{ ej }}</h4>
+            <p class="ej-desc">
+              {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
+            </p>
           </div>
         </div>
       </div>
@@ -98,6 +101,7 @@ function abreviarDia (d) {
 </template>
 
 <style scoped>
+/* contenedor y tarjeta, mismos estilos que antes */
 .detalleViewContainer {
   width: 100vw;
   min-height: 100vh;
@@ -112,12 +116,11 @@ function abreviarDia (d) {
 .detalleViewPage {
   max-width: 900px;
   width: 100%;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   padding: 2rem 2rem;
 }
-
 .volver-btn {
   position: absolute;
   top: 32px;
@@ -129,7 +132,6 @@ function abreviarDia (d) {
   font-weight: 600;
   border-radius: 4px;
 }
-
 .ej-card {
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
@@ -144,11 +146,6 @@ function abreviarDia (d) {
   height: 160px;
   object-fit: contain;
 }
-.ej-title {
-  font-weight: 600;
-}
-.ej-desc {
-  font-size: .875rem;
-  color: #d1d5db;
-}
+.ej-title { font-weight: 600; }
+.ej-desc { font-size: .875rem; color: #d1d5db; }
 </style>

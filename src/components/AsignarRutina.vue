@@ -352,6 +352,7 @@ function guardarRutinaDia(dia) {
   rutinaGuardada.value[dia] = true
 }
 
+
 function volverVistaAlumno() {
   router.push(`/alumno/${alumno.value.email}`)
 }

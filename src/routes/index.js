@@ -15,6 +15,7 @@ import SeleccionarEntrenador from '../components/SeleccionarEntrenador.vue'
 import AsignarRutina from '../components/AsignarRutina.vue'
 import ProgresoAlu from '../components/ProgresoAlu.vue'
 import ModificarDatos from '../components/ModificarDatos.vue'
+import RutinaDetalle  from '../components/RutinaDetalle.vue'
 
 const routes = [
     { path: '/', name: 'Home', component: Home},
@@ -32,7 +33,8 @@ const routes = [
     {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador},
     {path: '/asignarRutina/:email', name: 'AsignarRutina', component: AsignarRutina},
     {path: '/progreso', name: 'ProgresoAlu', component: ProgresoAlu},
-    {path: '/modificar:/:email', name: 'ModificarDatos', component: ModificarDatos}
+    {path: '/modificar:/:email', name: 'ModificarDatos', component: ModificarDatos},
+    {path: '/verRutina/:email', name: "RutinaDetalle", component: RutinaDetalle}
 ]
 
 const router = createRouter({ 

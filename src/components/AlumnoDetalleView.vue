@@ -24,12 +24,23 @@
 
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-semibold">Plan de entrenamiento del día</h2>
-          <template v-if="isTrainer">
-            <button class="addRoutine-link" @click="asignarRutina">
-              {{ alumno.rutina?.length ? 'Modificar rutina' : 'Asignar rutina' }}
-            </button>
-          </template>
+          <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-semibold">Plan de entrenamiento del día</h2>
+
+              <div class="flex gap-2">
+                <template v-if="alumno.rutina?.length">
+                  <button class="btn-rutina" @click="verRutina">
+                    Ver rutina
+                  </button>
+                </template>
+
+                <template v-if="isTrainer">
+                  <button class="addRoutine-link" @click="asignarRutina">
+                    {{ alumno.rutina?.length ? 'Modificar rutina' : 'Asignar rutina' }}
+                  </button>
+                </template>
+              </div>
+            </div>
         </div>
 
         <div v-if="alumno.rutina.length === 0 && !isTrainer" class="text-gray-400">
@@ -51,7 +62,6 @@
             </li>
           </ul>
 
-          <!-- Card con detalles del día seleccionado -->
           <div v-if="diaSeleccionado" class="dia-detalle-card">
             <header class="dia-detalle-header">
               <h3 class="capitalize">{{ diaSeleccionado.dia }}</h3>
@@ -84,7 +94,6 @@
         </div>
       </section>
 
-      <!-- ░░░ PROGRESO ░░░ -->
       <section class="mt-10 w-full">
       <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
@@ -154,7 +163,6 @@ async function cargarAlumno(email) {
   const encontrado = userStore.users.find(u => u.email === email)
   if (encontrado) {
     encontrado.rutina = encontrado.rutina.map(d => {
-      // si ya viene el nombre lo respetamos; si no, lo calculamos
       const nombreDia = d.dia ?? obtenerNombreDia(d.fecha)
 
       return {
@@ -173,7 +181,6 @@ async function cargarAlumno(email) {
       return fecha.getDate() === new Date().getDate()
     })
 
-    // ✅ Establecer día actual seleccionado si se encuentra
     selectedDiaIndex.value = hoyIdx !== -1 ? hoyIdx : 0
   } else {
     alumno.value = { email: '' }
@@ -222,12 +229,26 @@ const porcentajeProgreso = computed(() => {
   return Math.round((completados / total) * 100)
 })
 
+function verRutina () {
+  router.push(`/verRutina/${alumno.value.email}`)
+}
+
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)
 </script>
 
 
 <style scoped>
+
+.btn-rutina{
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
+  transition: 0.2s;
+}
+
 .detalleViewContainer {
   width: 100vw;
   min-height: 100vh;

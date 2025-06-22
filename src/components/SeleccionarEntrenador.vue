@@ -22,6 +22,7 @@
           <option disabled value="">Seleccioná un entrenador</option>
           <option v-for="e in entrenadores" :key="e.email" :value="e.email">
             {{ e.nombre }} {{ e.apellido }} ({{ e.email }})
+            
           </option>
         </select>
       </label>
@@ -106,17 +107,16 @@ textarea {
 }
 
 .btn-guardar {
-  align-self: center;
-  margin-top: 1rem;
-  background: #28a745;
-  color: #fff;
-  border: none;
-  padding: 0.7rem 2rem;
-  border-radius: 6px;
+  width: 200px;
+  height: 50px;
+  /* margin-bottom: 0.5rem; */
+  background-color: var(--color-success);
+  color: var(--color-text-light);
   font-size: 1rem;
-  font-weight: 600;
+  border-radius: 1px;
+  border: none;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 500;
 }
 
 .btn-guardar:hover {

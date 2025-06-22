@@ -1,10 +1,61 @@
+<style>
+.asignarRutinaPage {
+  width: 100dvw;
+  height: 100dvh;
+  padding: 2rem;
+  background-color: var(--color-background-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 8vh;
+}
+
+
+.asignarRutinaContainer {
+  max-width: 400px;
+  padding: 1rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.btn-guardar{
+    width: 100px;
+    height: 40px;
+    margin-bottom: 0.5rem;
+    background-color: var(--color-success);
+    color: var(--color-text-light);
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-volver{
+  width: 100px;
+  height: 40px;
+  color: var(--color-text-light);
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+</style>
 <template>
-  <div class="container mx-auto py-8">
+    <div class="asignarRutinaPage">
     <h1 class="text-2xl font-bold mb-6">
       Asignar rutina a {{ alumno.nombre }}
     </h1>
 
-    <div class="flex flex-col md:flex-row gap-10">
+    <div class="asignarRutinaContainer">
       <form class="flex-1 space-y-10">
         <div
           v-for="dia in diasSemana"
@@ -32,7 +83,7 @@
           </div>
 
           <template v-if="!rutinaGuardada[dia]">
-            <label class="block mb-2">Añadir grupos musculares</label>
+            <label class="block mb-2">Grupos musculares</label>
             <select
               v-model="gruposDropdown[dia]"
               @change="agregarGrupo(dia)"
@@ -122,23 +173,20 @@
         </div>
 
         <div v-if="diasPendientes.length" class="text-right">
+          <button type="button" class="btn-guardar"@click="guardarTodo">
+            Guardar 
+          </button>
           <button
             type="button"
-            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-            @click="guardarTodo"
+            class="btn-volver"
+            @click="volverVistaAlumno"
           >
-            Guardar {{ diasPendientes.length === 1 ? 'rutina pendiente' : 'todas las rutinas pendientes' }}
+            Volver
           </button>
         </div>
       </form>
 
-      <button
-        type="button"
-        class="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm self-start"
-        @click="volverVistaAlumno"
-      >
-        Volver
-      </button>
+      
     </div>
   </div>
 </template>

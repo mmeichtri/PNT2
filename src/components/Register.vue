@@ -103,7 +103,6 @@ function registro () {
 </script>
 
 <style>
-/* === Estilos idénticos a los tuyos (solo copiados) === */
 .registerPage {
   display: flex;
   flex-direction: column;

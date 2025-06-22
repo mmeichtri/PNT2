@@ -124,7 +124,6 @@ const alumno = ref({
   progreso: []
 })
 
-/* ░░░ Barra de días ░░░ */
 const selectedDiaIndex = ref(0)
 const diaSeleccionado = computed(() => alumno.value.rutina[selectedDiaIndex.value])
 
@@ -149,7 +148,7 @@ async function cargarAlumno(email) {
 
       return {
         ...d,
-        dia: nombreDia,                     // 👈  AHORA sí existe
+        dia: nombreDia,                   
         hecho: d.hecho ?? false,
         fechaOriginal: d.fecha,
         diaNumero: d.fecha ? formatearFecha(d.fecha) : '--'

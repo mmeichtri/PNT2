@@ -4,31 +4,26 @@
 
     <div class="registerContainer">
       <form @submit.prevent="registro">
-        <!-- Nombre -->
         <div class="form-row">
           <input v-model="nombre" type="text" placeholder="Nombre" />
           <span v-if="submitted && !nombre" class="error">*</span>
         </div>
 
-        <!-- Apellido -->
         <div class="form-row">
           <input v-model="apellido" type="text" placeholder="Apellido" />
           <span v-if="submitted && !apellido" class="error">*</span>
         </div>
 
-        <!-- Email -->
         <div class="form-row">
           <input v-model="email" type="email" placeholder="Correo" />
           <span v-if="submitted && (!email || !checkEmail)" class="error">*</span>
         </div>
 
-        <!-- Password -->
         <div class="form-row">
           <input v-model="password" type="password" placeholder="Contraseña" />
           <span v-if="submitted && !password" class="error">*</span>
         </div>
 
-        <!-- Rol -->
         <div class="form-row">
           <select v-model="rol">
             <option disabled value="">Seleccioná un rol</option>
@@ -38,7 +33,6 @@
           <span v-if="submitted && !rol" class="error">*</span>
         </div>
 
-        <!-- Botón -->
         <div class="form-actions">
           <button class="btn-register" type="submit">Registrarse</button>
         </div>
@@ -52,29 +46,29 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 
-/* ──────── Reactive state ──────── */
+
 const nombre    = ref('')
 const apellido  = ref('')
 const email     = ref('')
 const password  = ref('')
 const rol       = ref('')
+const fecha = new Date().toLocaleDateString()
 const submitted = ref(false)
 
-/* ──────── Composables ──────── */
+
 const router    = useRouter()
 const userStore = useUserStore()
 
-/* ──────── Helpers ──────── */
+
 const checkEmail = computed(() => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return re.test(email.value)
 })
 
-/* ──────── Actions ──────── */
+
 function registro () {
   submitted.value = true
 
-  // Validar campos obligatorios
   if (!nombre.value || !apellido.value || !email.value || !password.value || !rol.value) {
     alert('Completar los datos faltantes!')
     return
@@ -92,7 +86,8 @@ function registro () {
     apellido : apellido.value,
     email    : email.value,
     password : password.value,
-    rol      : rol.value
+    rol      : rol.value,
+    fecha: fecha
   }
   userStore.addUser(nuevoUsuario)
 

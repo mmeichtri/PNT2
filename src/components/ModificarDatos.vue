@@ -12,15 +12,22 @@
       </h2>
       <p class="role">{{ userStore.loggedUser.rol }}</p>
       <div class="info">
-        <p><strong>Email:</strong> {{ userStore.loggedUser.email }}</p>
-        <p><strong>Edad:</strong> {{ userStore.loggedUser.edad }}</p>
-        <p><strong>Teléfono:</strong> {{ userStore.loggedUser.telefono || 'No disponible' }}</p>
-        <p><strong>Descripción:</strong> {{ userStore.loggedUser.objetivo }}</p>
-        <p><strong>Fecha de inicio:</strong> {{ userStore.loggedUser.fecha }}</p>
+        <div class="form-row">
+          <input v-model="user.email" type="text" placeholder="Email" />
+        </div>
+        <div class="form-row">
+          <input v-model="user.edad" type="text" placeholder="Edad" />
+        </div>
+        <div class="form-row">
+          <input v-model="user.telefono" type="text" placeholder="Telefono" />
+        </div>
+        <div class="form-row">
+          <input v-model="user.descripcion" type="text" placeholder="Descripción" />
+        </div>
+
       </div>
       <div class="form-actions">
-          <button class="btn-modificar"  @click="modificar" type="submit">Modificar</button>
-          <button class="btn-eliminar"  @click="eliminarUsuario" type="submit">Eliminar usuario</button>
+          <button class="btn-guardar"  @click="guardar" type="submit">Guardar</button>
       </div>
 </div>
     </div>
@@ -30,24 +37,23 @@
 <script setup>
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
+import { reactive } from 'vue'
 
 const userStore = useUserStore()
 const router  = useRouter()
-const email = userStore.loggedUser.email
+const user = reactive({ ...userStore.loggedUser })
 
-function modificar(){
-  router.push({path: '/modificar/${email}'})
-}
-
-
-function eliminarUsuario() {
-  const confirmar = confirm('¿Estás seguro de que querés eliminar tu usuario? Esta acción no se puede deshacer.')
-  if (!confirmar) return
-    const email = userStore.loggedUser.email
-    userStore.users = userStore.users.filter(u => u.email !== email)
-    userStore.loggedUser = null
+function guardar () {
+  const idx = userStore.users.findIndex(u => u.email === user.email)
+  if (idx !== -1) {
+    userStore.users[idx] = { ...user }      
+    userStore.loggedUser = { ...user }  
     userStore._guardarLocalStorage()
-    router.push('/')
+    alert('Perfil actualizado correctamente.')
+    router.push({path: '/miPerfil'})
+  } else {
+    alert('Error: usuario no encontrado.')
+  }
 }
 
 </script>
@@ -108,15 +114,7 @@ function eliminarUsuario() {
   margin: 0.5rem 0;
 }
 
-.btn-eliminar{
-  padding: 8px 16px;
-  border: 1px solid #e74c3c;
-  border-radius: 6px;
-  color: #e74c3c;
-  transition: 0.2s;
-}
-
-.btn-modificar{
+.btn-guardar{
   padding: 8px 16px;
   border-radius: 6px;
   color: var(--color-text-light);

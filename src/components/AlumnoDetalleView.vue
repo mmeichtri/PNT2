@@ -25,7 +25,7 @@
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
           <div class="flex justify-between items-center mb-4">
-              <h2 class="text-2xl font-semibold">Plan de entrenamiento del día</h2>
+              <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
 
               <div class="flex gap-2">
                 <template v-if="alumno.rutina?.length">

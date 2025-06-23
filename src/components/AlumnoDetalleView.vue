@@ -315,16 +315,43 @@ watch(() => route.params.email, cargarAlumno)
   font-weight:600; border-radius:4px;
 }
 
-.avatar-wrapper { width:160px;height:160px;border-radius:50%;overflow:hidden;background:#fff; }
-.avatar-wrapper img { width:100%;height:100%;object-fit:cover; }
+.avatar-wrapper { 
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#fff; 
+}
+.avatar-wrapper img {
+   width:100%;
+   height:100%;
+   object-fit:cover; 
+  }
 
-.dias-selector { display:flex; gap:12px; overflow-x:auto; padding-bottom:16px; margin-bottom:24px; }
-.dias-selector::-webkit-scrollbar { display:none; }
+.dias-selector {
+  display:flex; 
+  gap:12px; 
+  overflow-x:auto; 
+  padding-bottom:16px; 
+  margin-bottom:24px; 
+}
+
+.dias-selector::-webkit-scrollbar { 
+  display:none; 
+}
+
 .dia-pill {
-  width:64px;height:94px;border-radius:30px;
-  background:#505050;border:1px solid #666;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  user-select:none;transition:.12s transform,.2s background; flex-shrink:0;
+  width:64px;height:94px;
+  border-radius:30px;
+  background:#505050;
+  border:1px solid #666;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  user-select:none;
+  transition:.12s transform,.2s background; flex-shrink:0;
 }
 .dia-pill:hover{ 
   transform:translateY(-2px); 

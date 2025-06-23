@@ -31,7 +31,7 @@ const routes = [
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
     {path: '/alumno/:email',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
     {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador},
-    {path: '/asignarRutina/:email/:diaIdx', name: 'AsignarRutina', component: AsignarRutina},
+    {path: '/asignarRutina/:email/:diaIndex', name: 'AsignarRutina', component: AsignarRutina},
     {path: '/progreso', name: 'ProgresoAlu', component: ProgresoAlu},
     {path: '/modificar:/:email/', name: 'ModificarDatos', component: ModificarDatos},
     {path: '/verRutina/:email/:diaIdx', name: "RutinaDetalle", component: RutinaDetalle}

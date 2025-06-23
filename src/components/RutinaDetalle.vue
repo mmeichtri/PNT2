@@ -11,7 +11,6 @@ const alumno = ref(null)
 const diaSeleccionado = ref(null)
 const cargando = ref(true)
 
-/*  grupo → objEjercicios  */
 const datosGrupo = reactive({})
 
 async function fetchGrupo (grupo) {
@@ -41,7 +40,6 @@ async function cargar () {
 
   if (!diaSeleccionado.value) return
 
-  /* bajar los grupos de este día únicamente */
   const grupos = Object.keys(diaSeleccionado.value.descripcion || {})
   await Promise.all(grupos.map(fetchGrupo))
 
@@ -84,15 +82,18 @@ function abreviarDia (d) {
             :key="ej"
             class="ej-card"
           >
+            <div class="ej-content">
+              <h4 class="ej-title">{{ ej }}</h4>
+              <p class="ej-desc">
+                {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
+              </p>
+            </div>
+
             <img
               :src="datosGrupo[grupo]?.[ej]?.img || '/placeholder.png'"
               alt="img ejercicio"
               class="ej-img"
             />
-            <h4 class="ej-title">{{ ej }}</h4>
-            <p class="ej-desc">
-              {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
-            </p>
           </div>
         </div>
       </div>
@@ -101,7 +102,6 @@ function abreviarDia (d) {
 </template>
 
 <style scoped>
-/* contenedor y tarjeta, mismos estilos que antes */
 .detalleViewContainer {
   width: 100vw;
   min-height: 100vh;
@@ -137,15 +137,22 @@ function abreviarDia (d) {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   padding: 1rem;
+  display: flex;             
+  align-items: flex-start;
+  gap: 1rem;
+}
+.ej-content {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: .5rem;
 }
 .ej-img {
-  width: 100%;
+  width: 160px;
   height: 160px;
   object-fit: contain;
+  flex-shrink: 0;  
 }
 .ej-title { font-weight: 600; }
-.ej-desc { font-size: .875rem; color: #d1d5db; }
+.ej-desc  { font-size: .875rem; color: #d1d5db; }
 </style>

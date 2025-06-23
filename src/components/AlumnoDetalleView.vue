@@ -10,10 +10,7 @@
     <div v-else class="detalleViewPage">
       <header class="flex flex-col items-center gap-2 mb-8">
         <div class="avatar-wrapper">
-          <img
-            :src="alumno.foto || '/avatar-default.png'"
-            alt="avatar alumno"
-          />
+          <img :src="alumno.foto || '/avatar-default.png'" alt="avatar alumno" />
         </div>
         <div class="text-center">
           <h1 class="text-2xl font-bold">{{ alumno.nombre }}</h1>
@@ -24,55 +21,52 @@
 
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
-          <div class="flex justify-between items-center mb-4">
-              <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
+          <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
 
-              <div class="flex gap-2">
-                <template v-if="alumno.rutina?.length">
-                  <button class="btn-rutina" @click="verRutina">
-                    Ver rutina
-                  </button>
-                </template>
+          <div class="flex gap-2 items-center">
+            <template v-if="diaTieneRutina">
+              <button class="btn-rutina" @click="verRutina">Ver rutina</button>
+            </template>
 
-                <template v-if="isTrainer">
-                  <button
-                    class="addRoutine-link"
-                    @click="alumno.rutina?.length ? modificarRutinaDia() : asignarRutina()"
-                  >
-                    {{ alumno.rutina?.length ? 'Modificar rutina' : 'Asignar rutina' }}
-                  </button>
-                </template>
+            <template v-if="isTrainer">
+              <button
+                class="addRoutine-link"
+                @click="diaTieneRutina ? modificarRutinaDia() : asignarRutina()"
+              >
+                {{ diaTieneRutina ? 'Modificar rutina' : 'Asignar rutina' }}
+              </button>
+            </template>
 
-                <span
-                  v-if="diaSeleccionado"
-                  class="estado-pill"
-                  :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
-                >
-                  {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
-                </span>
-              </div>
-            </div>
+            <span
+              v-if="diaSeleccionado"
+              class="estado-pill"
+              :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
+            >
+              {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
+            </span>
+          </div>
         </div>
 
-        <div v-if="alumno.rutina.length === 0 && !isTrainer" class="text-gray-400">
+        <div v-if="sinRutinaAlumno && !isTrainer" class="text-gray-400">
           Sin rutina asignada aún.
         </div>
 
         <div v-else>
           <ul class="dias-selector">
-            <li v-for="(diaRutina, idx) in alumno.rutina" :key="idx">
-              
+            <li v-for="(diaRutina, idx) in alumno.rutina" :key="'dia-'+idx">
               <button
                 class="dia-pill"
                 :class="{ 'dia-pill--activo': idx === selectedDiaIndex }"
                 @click="selectDia(idx)"
               >
-                <span class="dia-pill-dia">{{ abreviarDia(diaRutina.dia) }}</span>
+                <span class="dia-pill-dia">
+                  {{ esHoy(diaRutina) ? 'Hoy ' + abreviarDia(diaRutina.dia) : abreviarDia(diaRutina.dia) }}
+                </span>
                 <span class="dia-pill-fecha">{{ diaRutina.diaNumero }}</span>
               </button>
             </li>
           </ul>
-          
+
           <div v-if="diaSeleccionado" class="flex items-center gap-3">
             <span
               class="estado-pill"
@@ -81,7 +75,7 @@
               {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
             </span>
 
-            <div class="checkbox-wrapper" v-if="!isTrainer">
+            <div class="checkbox-wrapper" v-if="!isTrainer && !diaSeleccionado.esPlaceholder">
               <input
                 type="checkbox"
                 :id="`hecho-header-${diaSeleccionado.dia}`"
@@ -95,31 +89,31 @@
       </section>
 
       <section class="mt-10 w-full">
-      <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
+        <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-      <div v-if="alumno.rutina.length" class="mb-4">
-        <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
-          <div
-            class="bg-green-400 h-full transition-all duration-500 ease-in-out"
-            :style="{ width: porcentajeProgreso + '%' }"
-          ></div>
+        <div v-if="alumno.rutina.length && progresoTotal > 0" class="mb-4">
+          <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
+            <div
+              class="bg-green-400 h-full transition-all duration-500 ease-in-out"
+              :style="{ width: porcentajeProgreso + '%' }"
+            ></div>
+          </div>
+          <p class="text-sm mt-1 text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
-        <p class="text-sm mt-1 text-gray-300">{{ porcentajeProgreso }}% completado</p>
-      </div>
 
-      <ul class="space-y-2">
-        <li
-          v-for="(item, i) in alumno.progreso"
-          :key="i"
-          class="p-3 border-l-4 border-green-500 bg-green-50 rounded"
-        >
-          {{ item.fecha }} – {{ item.descripcion }}
-        </li>
-        <li v-if="alumno.progreso.length === 0" class="text-gray-400">
-          Aún no hay registros de progreso.
-        </li>
-      </ul>
-    </section>
+        <ul class="space-y-2">
+          <li
+            v-for="(item, i) in alumno.progreso"
+            :key="'prog-'+i"
+            class="p-3 border-l-4 border-green-500 bg-green-50 rounded text-gray-800"
+          >
+            {{ item.fecha }} – {{ item.descripcion }}
+          </li>
+          <li v-if="alumno.progreso.length === 0" class="text-gray-400">
+            Aún no hay registros de progreso.
+          </li>
+        </ul>
+      </section>
     </div>
   </section>
 </template>
@@ -147,53 +141,33 @@ const alumno = ref({
 const selectedDiaIndex = ref(0)
 const diaSeleccionado = computed(() => alumno.value.rutina[selectedDiaIndex.value])
 
+function esHoy(diaRutina) {
+  if (!diaRutina?.fechaOriginal) return false
+  const fecha = new Date(diaRutina.fechaOriginal)
+  const hoy = new Date()
+  return (
+    fecha.getDate() === hoy.getDate() &&
+    fecha.getMonth() === hoy.getMonth() &&
+    fecha.getFullYear() === hoy.getFullYear()
+  )
+}
+
 function selectDia(idx) {
   selectedDiaIndex.value = idx
 }
 
 function formatearFecha(fechaISO) {
+  if (!fechaISO) return '--'
   const fecha = new Date(fechaISO)
   return fecha.getDate().toString().padStart(2, '0')
 }
 
 function asignarRutina() {
-  router.push(`/asignarRutina/${alumno.value.email}`)
+  router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 
 function modificarRutinaDia() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
-}
-
-async function cargarAlumno(email) {
-  cargando.value = true
-  await userStore.loadUserFromStorage()
-
-  const encontrado = userStore.users.find(u => u.email === email)
-  if (encontrado) {
-    encontrado.rutina = encontrado.rutina.map(d => {
-      const nombreDia = d.dia ?? obtenerNombreDia(d.fecha)
-
-      return {
-        ...d,
-        dia: nombreDia,                   
-        hecho: d.hecho ?? false,
-        fechaOriginal: d.fecha,
-        diaNumero: d.fecha ? formatearFecha(d.fecha) : '--'
-      }
-    })
-  
-    alumno.value = { ...alumno.value, ...encontrado }
-
-    const hoyIdx = alumno.value.rutina.findIndex(r => {
-      const fecha = new Date(r.fechaOriginal)
-      return fecha.getDate() === new Date().getDate()
-    })
-
-    selectedDiaIndex.value = hoyIdx !== -1 ? hoyIdx : 0
-  } else {
-    alumno.value = { email: '' }
-  }
-  cargando.value = false
 }
 
 function obtenerNombreDia(fechaISO) {
@@ -223,28 +197,69 @@ function guardarEstadoDia(idx) {
   }
 }
 
+async function cargarAlumno(email) {
+  cargando.value = true
+  await userStore.loadUserFromStorage()
+
+  const encontrado = userStore.users.find(u => u.email === email)
+  if (encontrado) {
+    const rutinaMapeada = (encontrado.rutina || []).map(d => {
+      const nombreDia = d.dia ?? obtenerNombreDia(d.fecha)
+      return {
+        ...d,
+        dia: nombreDia,
+        hecho: d.hecho ?? false,
+        fechaOriginal: d.fecha ?? null,
+        diaNumero: d.fecha ? formatearFecha(d.fecha) : '--'
+      }
+    })
+
+    const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
+    const rutinaCompleta = diasSemana.map((diaTexto, diaIdx) => {
+      const existente = rutinaMapeada.find(r => r.dia.toLowerCase() === diaTexto)
+      if (existente) return existente
+      return {
+        dia: diaTexto,
+        diaNumero: '--',
+        hecho: false,
+        fechaOriginal: null,
+        esPlaceholder: true
+      }
+    })
+
+    alumno.value = { ...alumno.value, ...encontrado, rutina: rutinaCompleta }
+
+    const hoyIdx = rutinaCompleta.findIndex(r => esHoy(r))
+    selectedDiaIndex.value = hoyIdx !== -1 ? hoyIdx : 0
+  } else {
+    alumno.value = { email: '' }
+  }
+  cargando.value = false
+}
+
 const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
 
+const diaTieneRutina = computed(() => {
+  return diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder
+})
+
+const progresoTotal = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
 
 const porcentajeProgreso = computed(() => {
-  const total = alumno.value.rutina.length
+  const total = progresoTotal.value
   if (!total) return 0
-  const completados = alumno.value.rutina.filter(d => d.hecho).length
+  const completados = alumno.value.rutina.filter(d => !d.esPlaceholder && d.hecho).length
   return Math.round((completados / total) * 100)
 })
 
-function verRutina () {
-  router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
-}
+const sinRutinaAlumno = computed(() => progresoTotal.value === 0)
 
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)
 </script>
 
-
 <style scoped>
-
-.btn-rutina{
+.btn-rutina {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -264,6 +279,7 @@ watch(() => route.params.email, cargarAlumno)
   padding-top: 6vh;
   color: #e5e7eb;
 }
+
 .detalleViewPage {
   max-width: 680px;
   width: 100%;
@@ -316,6 +332,7 @@ watch(() => route.params.email, cargarAlumno)
   overflow-x: auto;
   padding-bottom: 16px;
   margin-bottom: 24px;
+  color: #fff;
 }
 .dias-selector::-webkit-scrollbar {
   display: none;
@@ -373,20 +390,6 @@ watch(() => route.params.email, cargarAlumno)
   color: #1f1f1f;
 }
 
-.dia-detalle-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.dia-detalle-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .estado-pill {
   padding: 2px 10px;
   border-radius: 9999px;
@@ -402,30 +405,10 @@ watch(() => route.params.email, cargarAlumno)
   color: #7f1d1d;
 }
 
-.grupo-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.9rem;
-}
-
 .checkbox-wrapper {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
 }
-
-.progress-bar {
-  height: 1.25rem;
-  border-radius: 9999px;
-  background-color: #1f2937; 
-  overflow: hidden;
-}
-.progress-bar-fill {
-  background-color: #34d399; 
-  height: 100%;
-  transition: width 0.4s ease-in-out;
-}
-
 </style>

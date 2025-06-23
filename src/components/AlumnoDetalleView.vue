@@ -251,7 +251,7 @@ async function cargarAlumno(email) {
 }
 
 const isTrainer        = computed(() => userStore.loggedUser?.rol === 'entrenador')
-const diaTieneRutina   = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
+const diaTieneRutina   = computed(() => diaSeleccionado.value)
 const progresoTotal    = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
 const porcentajeProgreso = computed(() => {
   const total = progresoTotal.value

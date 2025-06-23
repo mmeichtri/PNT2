@@ -1,5 +1,5 @@
 <template>
-  <button @click="$router.back()" class="volver-btn">← Volver</button>
+  <button @click="$router.back()" class="volver-btn">Volver</button>
 
   <section class="detalleViewContainer">
     <div v-if="cargando" class="text-white">Cargando datos del alumno…</div>
@@ -67,25 +67,17 @@
             </li>
           </ul>
 
-          <div v-if="diaSeleccionado" class="flex items-center gap-3">
-            <span
-              class="estado-pill"
-              :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
-            >
-              {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
-            </span>
 
-            <div class="checkbox-wrapper" v-if="!isTrainer && !diaSeleccionado.esPlaceholder">
-              <input
-                type="checkbox"
-                :id="`hecho-header-${diaSeleccionado.dia}`"
-                v-model="diaSeleccionado.hecho"
-                @change="guardarEstadoDia(selectedDiaIndex)"
-              />
-              <label :for="`hecho-header-${diaSeleccionado.dia}`">Marcar como completado</label>
-            </div>
+            <div v-if="!isTrainer && !diaSeleccionado.esPlaceholder">
+              <button
+                class="btn-marcar"
+                v-if="!diaSeleccionado.hecho"
+                @click="marcarComoHecho"
+              >
+                Marcar como realizado
+              </button>
+              </div>
           </div>
-        </div>
       </section>
 
       <section class="mt-10 w-full">
@@ -170,6 +162,11 @@ function modificarRutinaDia() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 
+
+function verRutina() {
+  router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
+}
+
 function obtenerNombreDia(fechaISO) {
   const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
   const fecha = new Date(fechaISO)
@@ -189,6 +186,7 @@ function abreviarDia(diaTexto) {
   return dias[diaTexto.toLowerCase()] || diaTexto.slice(0, 3)
 }
 
+
 function guardarEstadoDia(idx) {
   const userIdx = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (userIdx !== -1) {
@@ -196,6 +194,7 @@ function guardarEstadoDia(idx) {
     userStore._guardarLocalStorage()
   }
 }
+
 
 async function cargarAlumno(email) {
   cargando.value = true
@@ -215,7 +214,7 @@ async function cargarAlumno(email) {
     })
 
     const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
-    const rutinaCompleta = diasSemana.map((diaTexto, diaIdx) => {
+    const rutinaCompleta = diasSemana.map(diaTexto => {
       const existente = rutinaMapeada.find(r => r.dia.toLowerCase() === diaTexto)
       if (existente) return existente
       return {
@@ -237,21 +236,20 @@ async function cargarAlumno(email) {
   cargando.value = false
 }
 
+function marcarComoHecho() {
+  diaSeleccionado.value.hecho = true
+  guardarEstadoDia(selectedDiaIndex.value)
+}
+
 const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
-
-const diaTieneRutina = computed(() => {
-  return diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder
-})
-
+const diaTieneRutina = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
 const progresoTotal = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
-
 const porcentajeProgreso = computed(() => {
   const total = progresoTotal.value
   if (!total) return 0
   const completados = alumno.value.rutina.filter(d => !d.esPlaceholder && d.hecho).length
   return Math.round((completados / total) * 100)
 })
-
 const sinRutinaAlumno = computed(() => progresoTotal.value === 0)
 
 cargarAlumno(route.params.email)
@@ -259,6 +257,20 @@ watch(() => route.params.email, cargarAlumno)
 </script>
 
 <style scoped>
+
+.btn-marcar {
+  padding: 6px 16px;
+  background-color: #10b981; 
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  transition: background 0.2s;
+}
+.btn-marcar:hover {
+  background-color: #059669;
+}
+
 .btn-rutina {
   padding: 8px 16px;
   border: none;
@@ -266,6 +278,17 @@ watch(() => route.params.email, cargarAlumno)
   background-color: var(--color-success);
   color: var(--color-text-light);
   transition: 0.2s;
+}
+.addRoutine-link {
+  padding: 8px 16px;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  color: #e74c3c;
+  transition: 0.2s;
+}
+.addRoutine-link:hover {
+  background: #e74c3c;
+  color: #fff;
 }
 
 .detalleViewContainer {
@@ -279,7 +302,6 @@ watch(() => route.params.email, cargarAlumno)
   padding-top: 6vh;
   color: #e5e7eb;
 }
-
 .detalleViewPage {
   max-width: 680px;
   width: 100%;
@@ -314,18 +336,6 @@ watch(() => route.params.email, cargarAlumno)
   object-fit: cover;
 }
 
-.addRoutine-link {
-  padding: 8px 16px;
-  border: 1px solid #e74c3c;
-  border-radius: 6px;
-  color: #e74c3c;
-  transition: 0.2s;
-}
-.addRoutine-link:hover {
-  background: #e74c3c;
-  color: #fff;
-}
-
 .dias-selector {
   display: flex;
   gap: 12px;
@@ -337,7 +347,6 @@ watch(() => route.params.email, cargarAlumno)
 .dias-selector::-webkit-scrollbar {
   display: none;
 }
-
 .dia-pill {
   width: 64px;
   height: 94px;
@@ -353,17 +362,12 @@ watch(() => route.params.email, cargarAlumno)
   transition: transform 0.12s, background 0.2s;
   flex-shrink: 0;
 }
-
-.dia-pill:hover {
-  transform: translateY(-2px);
-}
-
+.dia-pill:hover { transform: translateY(-2px); }
 .dia-pill-dia {
   font-size: 0.85rem;
   font-weight: 600;
   color: #d1d5db;
 }
-
 .dia-pill-fecha {
   width: 34px;
   height: 34px;
@@ -376,15 +380,12 @@ watch(() => route.params.email, cargarAlumno)
   color: #fff;
   font-size: 0.85rem;
 }
-
 .dia-pill--activo {
   background: #c5ff5d;
   transform: scale(1.05);
   border-color: #c5ff5d;
 }
-.dia-pill--activo .dia-pill-dia {
-  color: #1f1f1f;
-}
+.dia-pill--activo .dia-pill-dia { color: #1f1f1f; }
 .dia-pill--activo .dia-pill-fecha {
   background: #ffffff;
   color: #1f1f1f;
@@ -396,14 +397,8 @@ watch(() => route.params.email, cargarAlumno)
   font-size: 0.75rem;
   font-weight: 600;
 }
-.estado-pill--hecho {
-  background: #bbf7d0;
-  color: #065f46;
-}
-.estado-pill--pendiente {
-  background: #fecaca;
-  color: #7f1d1d;
-}
+.estado-pill--hecho { background: #bbf7d0; color: #065f46; }
+.estado-pill--pendiente { background: #fecaca; color: #7f1d1d; }
 
 .checkbox-wrapper {
   display: flex;

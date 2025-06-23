@@ -8,6 +8,7 @@
     </div>
 
     <div v-else class="detalleViewPage">
+      <!-- ──────────── Cabecera ──────────── -->
       <header class="flex flex-col items-center gap-2 mb-8">
         <div class="avatar-wrapper">
           <img :src="alumno.foto || '/avatar-default.png'" alt="avatar alumno" />
@@ -19,6 +20,7 @@
         </div>
       </header>
 
+      <!-- ──────────── Rutina ──────────── -->
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
@@ -52,6 +54,7 @@
         </div>
 
         <div v-else>
+          <!-- Selector de días -->
           <ul class="dias-selector">
             <li v-for="(diaRutina, idx) in alumno.rutina" :key="'dia-'+idx">
               <button
@@ -67,30 +70,39 @@
             </li>
           </ul>
 
-
-            <div v-if="!isTrainer && !diaSeleccionado.esPlaceholder">
-              <button
-                class="btn-marcar"
-                v-if="!diaSeleccionado.hecho"
-                @click="marcarComoHecho"
-              >
-                Marcar como realizado
-              </button>
-              </div>
+          <!-- Botón “Marcar como realizado” -->
+          <div v-if="!isTrainer && !diaSeleccionado.esPlaceholder && !diaSeleccionado.hecho">
+            <button class="btn-marcar" @click="marcarComoHecho">
+              Marcar como realizado
+            </button>
           </div>
+        </div>
       </section>
 
+      <!-- ──────────── Progreso ──────────── -->
       <section class="mt-10 w-full">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-        <div v-if="alumno.rutina.length && progresoTotal > 0" class="mb-4">
-          <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden">
-            <div
-              class="bg-green-400 h-full transition-all duration-500 ease-in-out"
-              :style="{ width: porcentajeProgreso + '%' }"
-            ></div>
+        <div v-if="alumno.rutina.length && progresoTotal > 0" class="mb-6 flex items-center gap-4">
+          <div class="circular-progress">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path
+                class="circle-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                class="circle"
+                :stroke-dasharray="porcentajeProgreso + ', 100'"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <text x="18" y="20.35" class="percentage">{{ porcentajeProgreso }}%</text>
+            </svg>
           </div>
-          <p class="text-sm mt-1 text-gray-300">{{ porcentajeProgreso }}% completado</p>
+          <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
         <ul class="space-y-2">
@@ -101,11 +113,9 @@
           >
             {{ item.fecha }} – {{ item.descripcion }}
           </li>
-          <li v-if="alumno.progreso.length === 0" class="text-gray-400">
-            Aún no hay registros de progreso.
-          </li>
         </ul>
       </section>
+
     </div>
   </section>
 </template>
@@ -143,58 +153,41 @@ function esHoy(diaRutina) {
     fecha.getFullYear() === hoy.getFullYear()
   )
 }
-
-function selectDia(idx) {
-  selectedDiaIndex.value = idx
-}
-
+function selectDia(idx) { selectedDiaIndex.value = idx }
 function formatearFecha(fechaISO) {
   if (!fechaISO) return '--'
   const fecha = new Date(fechaISO)
   return fecha.getDate().toString().padStart(2, '0')
 }
-
 function asignarRutina() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
-
 function modificarRutinaDia() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
-
-
 function verRutina() {
   router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
-
 function obtenerNombreDia(fechaISO) {
   const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
-  const fecha = new Date(fechaISO)
-  return dias[fecha.getDay()]
+  return dias[new Date(fechaISO).getDay()]
 }
-
 function abreviarDia(diaTexto) {
-  const dias = {
-    lunes: 'Lun',
-    martes: 'Mar',
-    miércoles: 'Mie',
-    jueves: 'Jue',
-    viernes: 'Vie',
-    sábado: 'Sab',
-    domingo: 'Dom'
-  }
+  const dias = { lunes:'Lun', martes:'Mar', miércoles:'Mie', jueves:'Jue', viernes:'Vie', sábado:'Sab', domingo:'Dom' }
   return dias[diaTexto.toLowerCase()] || diaTexto.slice(0, 3)
 }
 
-
-function guardarEstadoDia(idx) {
+function guardarEstadoDia() {
   const userIdx = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (userIdx !== -1) {
     userStore.users[userIdx] = { ...alumno.value }
     userStore._guardarLocalStorage()
   }
 }
-
+function marcarComoHecho() {
+  diaSeleccionado.value.hecho = true
+  guardarEstadoDia()
+}
 
 async function cargarAlumno(email) {
   cargando.value = true
@@ -213,11 +206,10 @@ async function cargarAlumno(email) {
       }
     })
 
-    const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
+    const diasSemana = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']
     const rutinaCompleta = diasSemana.map(diaTexto => {
       const existente = rutinaMapeada.find(r => r.dia.toLowerCase() === diaTexto)
-      if (existente) return existente
-      return {
+      return existente ?? {
         dia: diaTexto,
         diaNumero: '--',
         hecho: false,
@@ -236,174 +228,140 @@ async function cargarAlumno(email) {
   cargando.value = false
 }
 
-function marcarComoHecho() {
-  diaSeleccionado.value.hecho = true
-  guardarEstadoDia(selectedDiaIndex.value)
-}
-
-const isTrainer = computed(() => userStore.loggedUser?.rol === 'entrenador')
-const diaTieneRutina = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
-const progresoTotal = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
+const isTrainer        = computed(() => userStore.loggedUser?.rol === 'entrenador')
+const diaTieneRutina   = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
+const progresoTotal    = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
 const porcentajeProgreso = computed(() => {
   const total = progresoTotal.value
   if (!total) return 0
   const completados = alumno.value.rutina.filter(d => !d.esPlaceholder && d.hecho).length
   return Math.round((completados / total) * 100)
 })
-const sinRutinaAlumno = computed(() => progresoTotal.value === 0)
+const sinRutinaAlumno  = computed(() => progresoTotal.value === 0)
 
 cargarAlumno(route.params.email)
 watch(() => route.params.email, cargarAlumno)
 </script>
 
 <style scoped>
-
-.btn-marcar {
-  padding: 6px 16px;
-  background-color: #10b981; 
-  color: white;
+.btn-rutina, .btn-marcar, .addRoutine-link {
+  padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 600;
-  border-radius: 6px;
+  transition: 0.2s;
   border: none;
-  transition: background 0.2s;
-}
-.btn-marcar:hover {
-  background-color: #059669;
 }
 
-.btn-rutina {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  background-color: var(--color-success);
-  color: var(--color-text-light);
-  transition: 0.2s;
+.btn-rutina{ 
+  background: var(--color-success);
+  color: var(--color-text-light); 
 }
-.addRoutine-link {
-  padding: 8px 16px;
-  border: 1px solid #e74c3c;
-  border-radius: 6px;
-  color: #e74c3c;
-  transition: 0.2s;
+.btn-marcar{ 
+  background: #10b981; color:#fff; 
 }
-.addRoutine-link:hover {
-  background: #e74c3c;
-  color: #fff;
+.btn-marcar:hover{ 
+  background: #059669;
+}
+.addRoutine-link{ 
+  background:none; border:1px solid #e74c3c; color:#e74c3c;
+}
+.addRoutine-link:hover{ 
+  background:#e74c3c; color:#fff;
 }
 
 .detalleViewContainer {
-  width: 100vw;
-  min-height: 100vh;
-  padding: 2rem;
+  width: 100vw; min-height: 100vh; padding: 2rem 2rem 4rem;
   background: var(--color-background-dark);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 6vh;
-  color: #e5e7eb;
+  display:flex; flex-direction:column; align-items:center; color:#e5e7eb;
 }
 .detalleViewPage {
-  max-width: 680px;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 2rem 1.5rem;
+  max-width: 680px; width:100%;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; padding:2rem 1.5rem;
 }
 
 .volver-btn {
-  position: absolute;
-  top: 32px;
-  left: 20px;
-  color: #3b82f6;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 6px 12px;
-  font-weight: 600;
-  border-radius: 4px;
+  position:absolute; top:32px; left:20px;
+  color:#3b82f6; background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.15); padding:6px 12px;
+  font-weight:600; border-radius:4px;
 }
 
-.avatar-wrapper {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #fff;
-}
-.avatar-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.avatar-wrapper { width:160px;height:160px;border-radius:50%;overflow:hidden;background:#fff; }
+.avatar-wrapper img { width:100%;height:100%;object-fit:cover; }
 
-.dias-selector {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
-  color: #fff;
-}
-.dias-selector::-webkit-scrollbar {
-  display: none;
-}
+.dias-selector { display:flex; gap:12px; overflow-x:auto; padding-bottom:16px; margin-bottom:24px; }
+.dias-selector::-webkit-scrollbar { display:none; }
 .dia-pill {
-  width: 64px;
-  height: 94px;
-  border-radius: 30px;
-  background: #505050;
-  border: 1px solid #666;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  user-select: none;
-  transition: transform 0.12s, background 0.2s;
-  flex-shrink: 0;
+  width:64px;height:94px;border-radius:30px;
+  background:#505050;border:1px solid #666;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  user-select:none;transition:.12s transform,.2s background; flex-shrink:0;
 }
-.dia-pill:hover { transform: translateY(-2px); }
-.dia-pill-dia {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #d1d5db;
+.dia-pill:hover      { transform:translateY(-2px); }
+.dia-pill-dia        { font-size:.85rem;font-weight:600;color:#d1d5db; }
+.dia-pill-fecha      { width:34px;height:34px;border-radius:50%;background:#777;
+                        display:flex;align-items:center;justify-content:center;
+                        font-weight:700;color:#fff;font-size:.85rem; }
+.dia-pill--activo          { background:#c5ff5d; transform:scale(1.05); border-color:#c5ff5d; }
+.dia-pill--activo .dia-pill-dia   { color:#1f1f1f; }
+.dia-pill--activo .dia-pill-fecha { background:#fff;color:#1f1f1f; }
+
+/* — Estado — */
+.estado-pill { padding:2px 10px;border-radius:9999px;font-size:.75rem;font-weight:600; }
+.estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
+.estado-pill--pendiente{ background:#fecaca;color:#7f1d1d; }
+
+.progress-circle {
+  --porcentaje:0;
+  width:110px;height:110px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:conic-gradient(#c5ff5d calc(var(--porcentaje)*1%), #3f3f3f 0deg);
+  transform:rotate(0deg); 
 }
-.dia-pill-fecha {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #777;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: #fff;
-  font-size: 0.85rem;
+.progress-circle::after {
+  content:'';position:absolute;inset:13px;
+  background:var(--color-background-dark); border-radius:50%;
 }
-.dia-pill--activo {
-  background: #c5ff5d;
-  transform: scale(1.05);
-  border-color: #c5ff5d;
+.progress-text {
+  position:absolute;transform:rotate(90deg); 
+  font-weight:700;font-size:1rem;color:#e5e7eb;
 }
-.dia-pill--activo .dia-pill-dia { color: #1f1f1f; }
-.dia-pill--activo .dia-pill-fecha {
-  background: #ffffff;
-  color: #1f1f1f;
+.circular-progress {
+  width: 80px;
+  height: 80px;
 }
 
-.estado-pill {
-  padding: 2px 10px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.circular-chart {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
 }
-.estado-pill--hecho { background: #bbf7d0; color: #065f46; }
-.estado-pill--pendiente { background: #fecaca; color: #7f1d1d; }
 
-.checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
+.circle-bg {
+  fill: none;
+  stroke: #2f2f2f;
+  stroke-width: 3.8;
 }
+
+.circle {
+  fill: none;
+  stroke: #c5ff5d;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dasharray 0.6s ease;
+}
+
+.percentage {
+  fill: white;
+  font-family: 'Arial', sans-serif;
+  font-size: 0.32em;
+  text-anchor: middle;
+}
+
+
 </style>

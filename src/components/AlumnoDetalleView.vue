@@ -40,16 +40,16 @@
             </template>
 
             <span
-              v-if="diaSeleccionado"
+              v-if="diaSeleccionado && !isTrainer"
               class="estado-pill"
-              :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
+              :class="estadoClase"
             >
-              {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
+              {{ estadoTexto }}
             </span>
           </div>
         </div>
 
-        <div v-if="sinRutinaAlumno && !isTrainer" class="text-gray-400">
+        <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400">
           Sin rutina asignada aún.
         </div>
 
@@ -82,8 +82,9 @@
       <section class="mt-10 w-full">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-        <div v-if="alumno.rutina.length && progresoTotal > 0" class="mb-6 flex items-center gap-4">
-          <div class="circular-progress">
+        <!-- Mostrar siempre el círculo, incluso con 0% -->
+        <div class="mb-6 flex items-center gap-4">
+          <div class="circular-progress" role="img" aria-label="Progreso total">
             <svg viewBox="0 0 36 36" class="circular-chart">
               <path
                 class="circle-bg"
@@ -104,7 +105,7 @@
           <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
-        <ul class="space-y-2">
+        <ul class="space-y-2" v-if="alumno.progreso.length > 0">
           <li
             v-for="(item, i) in alumno.progreso"
             :key="'prog-'+i"
@@ -142,6 +143,16 @@ const alumno = ref({
 const selectedDiaIndex = ref(0)
 const diaSeleccionado = computed(() => alumno.value.rutina[selectedDiaIndex.value])
 
+const estadoTexto = computed(() => {
+  if (diaSeleccionado.value?.esPlaceholder) return 'Sin rutina asignada'
+  return diaSeleccionado.value.hecho ? 'Completado' : 'Pendiente'
+})
+
+const estadoClase = computed(() => {
+  if (diaSeleccionado.value?.esPlaceholder) return 'estado-pill--sin'
+  return diaSeleccionado.value.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'
+})
+
 function esHoy(diaRutina) {
   if (!diaRutina?.fechaOriginal) return false
   const fecha = new Date(diaRutina.fechaOriginal)
@@ -152,29 +163,36 @@ function esHoy(diaRutina) {
     fecha.getFullYear() === hoy.getFullYear()
   )
 }
+
 function selectDia(idx) { selectedDiaIndex.value = idx }
+
 function formatearFecha(fechaISO) {
   if (!fechaISO) return '--'
   const fecha = new Date(fechaISO)
   return fecha.getDate().toString().padStart(2, '0')
 }
+
 function asignarRutina() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function modificarRutinaDia() {
-    if (diaSeleccionado.value) {
-      diaSeleccionado.value.hecho = false;  
-      guardarEstadoDia(); 
-    }
+  if (diaSeleccionado.value) {
+    diaSeleccionado.value.hecho = false
+    guardarEstadoDia()
+  }
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function verRutina() {
   router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function obtenerNombreDia(fechaISO) {
   const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
   return dias[new Date(fechaISO).getDay()]
 }
+
 function abreviarDia(diaTexto) {
   const dias = { lunes:'Lun', martes:'Mar', miércoles:'Mie', jueves:'Jue', viernes:'Vie', sábado:'Sab', domingo:'Dom' }
   return dias[diaTexto.toLowerCase()] || diaTexto.slice(0, 3)
@@ -187,6 +205,7 @@ function guardarEstadoDia() {
     userStore._guardarLocalStorage()
   }
 }
+
 function marcarComoHecho() {
   diaSeleccionado.value.hecho = true
   guardarEstadoDia()
@@ -247,6 +266,10 @@ watch(() => route.params.email, cargarAlumno)
 </script>
 
 <style scoped>
+.estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
+.estado-pill--pendiente{ background:#fecaca;color:#7f1d1d; }
+.estado-pill--sin      { background:#facc15;color:#7c4701; }
+
 .btn-rutina, .btn-marcar, .addRoutine-link {
   padding: 8px 16px;
   border-radius: 6px;
@@ -293,46 +316,85 @@ watch(() => route.params.email, cargarAlumno)
   font-weight:600; border-radius:4px;
 }
 
-.avatar-wrapper { width:160px;height:160px;border-radius:50%;overflow:hidden;background:#fff; }
-.avatar-wrapper img { width:100%;height:100%;object-fit:cover; }
+.avatar-wrapper { 
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#fff; 
+}
+.avatar-wrapper img {
+   width:100%;
+   height:100%;
+   object-fit:cover; 
+  }
 
-.dias-selector { display:flex; gap:12px; overflow-x:auto; padding-bottom:16px; margin-bottom:24px; }
-.dias-selector::-webkit-scrollbar { display:none; }
+.dias-selector {
+  display:flex; 
+  gap:12px; 
+  overflow-x:auto; 
+  padding-bottom:16px; 
+  margin-bottom:24px; 
+}
+
+.dias-selector::-webkit-scrollbar { 
+  display:none; 
+}
+
 .dia-pill {
-  width:64px;height:94px;border-radius:30px;
-  background:#505050;border:1px solid #666;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  user-select:none;transition:.12s transform,.2s background; flex-shrink:0;
+  width:64px;height:94px;
+  border-radius:30px;
+  background:#505050;
+  border:1px solid #666;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  user-select:none;
+  transition:.12s transform,.2s background; flex-shrink:0;
 }
-.dia-pill:hover      { transform:translateY(-2px); }
-.dia-pill-dia        { font-size:.85rem;font-weight:600;color:#d1d5db; }
-.dia-pill-fecha      { width:34px;height:34px;border-radius:50%;background:#777;
-                        display:flex;align-items:center;justify-content:center;
-                        font-weight:700;color:#fff;font-size:.85rem; }
-.dia-pill--activo          { background:#c5ff5d; transform:scale(1.05); border-color:#c5ff5d; }
-.dia-pill--activo .dia-pill-dia   { color:#1f1f1f; }
-.dia-pill--activo .dia-pill-fecha { background:#fff;color:#1f1f1f; }
+.dia-pill:hover{ 
+  transform:translateY(-2px); 
+}
+.dia-pill-dia{ 
+  font-size:.85rem;font-weight:600;color:#d1d5db;
+}
+.dia-pill-fecha{ 
+  width:34px;height:34px;border-radius:50%;
+  background:#777;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;color:#fff;
+  font-size:.85rem;
+}
+.dia-pill--activo{ 
+  background:#c5ff5d;
+  transform:scale(1.05);
+  border-color:#c5ff5d; }
+.dia-pill--activo .dia-pill-dia{ 
+  color:#1f1f1f; 
+}
+.dia-pill--activo .dia-pill-fecha{
+  background:#fff;color:#1f1f1f; 
+}
 
-/* — Estado — */
-.estado-pill { padding:2px 10px;border-radius:9999px;font-size:.75rem;font-weight:600; }
-.estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
-.estado-pill--pendiente{ background:#fecaca;color:#7f1d1d; }
+.estado-pill{
+  padding:2px 10px;
+  border-radius:9999px;
+  font-size:.75rem;
+  font-weight:600;
+}
+.estado-pill--hecho{ 
+  background:#bbf7d0;
+  color:#065f46; 
+}
+.estado-pill--pendiente{ 
+  background:#fecaca;
+  color:#7f1d1d;
+}
 
-.progress-circle {
-  --porcentaje:0;
-  width:110px;height:110px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;position:relative;
-  background:conic-gradient(#c5ff5d calc(var(--porcentaje)*1%), #3f3f3f 0deg);
-  transform:rotate(0deg); 
-}
-.progress-circle::after {
-  content:'';position:absolute;inset:13px;
-  background:var(--color-background-dark); border-radius:50%;
-}
-.progress-text {
-  position:absolute;transform:rotate(90deg); 
-  font-weight:700;font-size:1rem;color:#e5e7eb;
-}
 .circular-progress {
   width: 80px;
   height: 80px;
@@ -367,6 +429,4 @@ watch(() => route.params.email, cargarAlumno)
   font-size: 0.32em;
   text-anchor: middle;
 }
-
-
 </style>

@@ -125,7 +125,7 @@
           </div>
         </div>
 
-        <div class="actions" v-if="diasPendientes.length">
+        <div class="actions">
           <button type="button" class="btn-guardar" @click="guardarTodo">
             {{ diaIndexEditando !== null ? 'Guardar cambios' : 'Guardar' }}
           </button>
@@ -137,7 +137,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -262,32 +261,36 @@ function agregarGrupo(dia) {
   if (!grupo) return
   agregarGrupoManual(dia, grupo)
   gruposDropdown.value[dia] = ''
+  rutinaGuardada.value[dia] = false
 }
 
 function quitarGrupo(dia, grupo) {
   gruposPorDia.value[dia] = gruposPorDia.value[dia].filter(x => x !== grupo)
   delete ejerciciosSeleccionados.value[dia][grupo]
+  delete ejercicioTemporal.value[dia][grupo]
+  delete seriesTemporal.value[dia][grupo]
+  delete repeticionesTemporal.value[dia][grupo]
+  rutinaGuardada.value[dia] = false
 }
 
 function agregarEjercicio(dia, grupo) {
   const nombre = ejercicioTemporal.value[dia][grupo]
   const series = parseInt(seriesTemporal.value[dia][grupo]) || 0
   const repeticiones = parseInt(repeticionesTemporal.value[dia][grupo]) || 0
-
   if (!nombre || series <= 0 || repeticiones <= 0) return
-
   const lista = ejerciciosSeleccionados.value[dia][grupo]
   if (!lista.find(e => e.nombre === nombre)) {
     lista.push({ nombre, series, repeticiones })
   }
-
   ejercicioTemporal.value[dia][grupo] = ''
   seriesTemporal.value[dia][grupo] = ''
   repeticionesTemporal.value[dia][grupo] = ''
+  rutinaGuardada.value[dia] = false
 }
 
 function quitarEjercicio(dia, grupo, nombre) {
   ejerciciosSeleccionados.value[dia][grupo] = ejerciciosSeleccionados.value[dia][grupo].filter(e => e.nombre !== nombre)
+  rutinaGuardada.value[dia] = false
 }
 
 function resumenDia(dia) {
@@ -304,7 +307,7 @@ const diasMostrados = computed(() => {
 })
 
 const diasPendientes = computed(() =>
-  diasMostrados.value.filter(d => resumenDia(d).length && !rutinaGuardada.value[d])
+  diasMostrados.value.filter(d => !rutinaGuardada.value[d])
 )
 
 function guardarTodo() {
@@ -312,24 +315,36 @@ function guardarTodo() {
   router.push(`/alumno/${alumno.value.email}`)
 }
 
+function rutinaDiaVacia(dia) {
+  const grupos = gruposPorDia.value[dia] || []
+  if (grupos.length === 0) return true
+  return grupos.every(grupo => (ejerciciosSeleccionados.value[dia][grupo]?.length ?? 0) === 0)
+}
+
 function guardarRutinaDia(dia) {
-  const detalle = resumenDia(dia)
-  if (!detalle.length) return
+  const idxExistente = alumno.value.rutina.findIndex(r => r.dia === dia)
 
-  const nuevoDiaRutina = {
-    dia,
-    descripcion: {}
-  }
-
-  gruposPorDia.value[dia].forEach(grupo => {
-    nuevoDiaRutina.descripcion[grupo] = ejerciciosSeleccionados.value[dia][grupo]
-  })
-
-  const indiceDia = alumno.value.rutina.findIndex(r => r.dia === dia)
-  if (indiceDia !== -1) {
-    alumno.value.rutina[indiceDia] = { ...alumno.value.rutina[indiceDia], ...nuevoDiaRutina }
+  if (rutinaDiaVacia(dia)) {
+    if (idxExistente !== -1) {
+      alumno.value.rutina.splice(idxExistente, 1)
+    }
   } else {
-    alumno.value.rutina.push(nuevoDiaRutina)
+    const nuevoDiaRutina = {
+      dia,
+      descripcion: {}
+    }
+    gruposPorDia.value[dia].forEach(grupo => {
+      nuevoDiaRutina.descripcion[grupo] = ejerciciosSeleccionados.value[dia][grupo]
+    })
+
+    if (idxExistente !== -1) {
+      alumno.value.rutina[idxExistente] = {
+        ...alumno.value.rutina[idxExistente],
+        ...nuevoDiaRutina
+      }
+    } else {
+      alumno.value.rutina.push(nuevoDiaRutina)
+    }
   }
 
   const idxUser = userStore.users.findIndex(u => u.email === alumno.value.email)
@@ -345,6 +360,7 @@ function volverVistaAlumno() {
   router.push(`/alumno/${alumno.value.email}`)
 }
 </script>
+
 
 <style scoped>
 

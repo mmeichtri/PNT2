@@ -17,9 +17,8 @@
         <p><strong>Teléfono:</strong> {{ userStore.loggedUser.telefono || 'No disponible' }}</p>
         <p><strong>Descripción:</strong> {{ userStore.loggedUser.objetivo }}</p>
         <p><strong>Fecha de inicio:</strong> {{ userStore.loggedUser.fecha }}</p>
-        <div v-if="esAlumno" class="text-gray-400">
-          <p><strong>Entrenador: </strong> {{ userStore.entrenadorAsignado }}</p>
-        </div>
+        <p v-if="esAlumno"><strong>Entrenador:</strong> {{ userStore.loggedUser.entrenadorAsignado || 'Sin asignar' }}</p>
+
       </div>
       <div class="form-actions">
           <button class="btn-modificar"  @click="modificar" type="submit">Modificar</button>

@@ -8,6 +8,7 @@ const userStore = useUserStore()
 
 const menuItems = computed(() => {
   const rol = userStore.loggedUser?.rol
+  const email = userStore.loggedUser.email
   if (rol === 'entrenador') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil'},
@@ -17,7 +18,7 @@ const menuItems = computed(() => {
   } else if (rol === 'cliente') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
-      { name: 'Calendario', route: 'Calendario', icon: '📅', routeName: 'Clients' },
+      { name: 'Calendario', route: `/alumno/${email}`, icon: '📅', routeName: 'AlumnoDetalleView' },
       { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'ProgresoAlu' },
     ]
   } else if (rol === 'admin') {
@@ -34,8 +35,13 @@ const isCollapsed = ref(false)
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value
 }
- function goToRoute(routeName) {
-  router.push({ name: routeName })
+function goToRoute(routeName) {
+  if (routeName === 'AlumnoDetalleView') {
+    const email = userStore.loggedUser.email
+    router.push({ name: 'AlumnoDetalleView', params: { email } })
+  } else {
+    router.push({ name: routeName })
+  }
 }
 </script>
 

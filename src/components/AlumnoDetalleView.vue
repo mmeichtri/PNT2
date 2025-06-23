@@ -326,35 +326,76 @@ watch(() => route.params.email, cargarAlumno)
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
   user-select:none;transition:.12s transform,.2s background; flex-shrink:0;
 }
-.dia-pill:hover      { transform:translateY(-2px); }
-.dia-pill-dia        { font-size:.85rem;font-weight:600;color:#d1d5db; }
-.dia-pill-fecha      { width:34px;height:34px;border-radius:50%;background:#777;
-                        display:flex;align-items:center;justify-content:center;
-                        font-weight:700;color:#fff;font-size:.85rem; }
-.dia-pill--activo          { background:#c5ff5d; transform:scale(1.05); border-color:#c5ff5d; }
-.dia-pill--activo .dia-pill-dia   { color:#1f1f1f; }
-.dia-pill--activo .dia-pill-fecha { background:#fff;color:#1f1f1f; }
+.dia-pill:hover{ 
+  transform:translateY(-2px); 
+}
+.dia-pill-dia{ 
+  font-size:.85rem;font-weight:600;color:#d1d5db;
+}
+.dia-pill-fecha{ 
+  width:34px;height:34px;border-radius:50%;
+  background:#777;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;color:#fff;
+  font-size:.85rem;
+}
+.dia-pill--activo{ 
+  background:#c5ff5d;
+  transform:scale(1.05);
+  border-color:#c5ff5d; }
+.dia-pill--activo .dia-pill-dia{ 
+  color:#1f1f1f; 
+}
+.dia-pill--activo .dia-pill-fecha{
+  background:#fff;color:#1f1f1f; 
+}
 
-/* — Estado — */
-.estado-pill { padding:2px 10px;border-radius:9999px;font-size:.75rem;font-weight:600; }
-.estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
-.estado-pill--pendiente{ background:#fecaca;color:#7f1d1d; }
+.estado-pill{
+  padding:2px 10px;
+  border-radius:9999px;
+  font-size:.75rem;
+  font-weight:600;
+}
+.estado-pill--hecho{ 
+  background:#bbf7d0;
+  color:#065f46; 
+}
+.estado-pill--pendiente{ 
+  background:#fecaca;
+  color:#7f1d1d;
+}
 
 .progress-circle {
   --porcentaje:0;
-  width:110px;height:110px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;position:relative;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
   background:conic-gradient(#c5ff5d calc(var(--porcentaje)*1%), #3f3f3f 0deg);
   transform:rotate(0deg); 
 }
+
 .progress-circle::after {
-  content:'';position:absolute;inset:13px;
-  background:var(--color-background-dark); border-radius:50%;
+  content:'';
+  position:absolute;
+  inset:13px;
+  background:var(--color-background-dark);
+  border-radius:50%;
 }
+
 .progress-text {
-  position:absolute;transform:rotate(90deg); 
-  font-weight:700;font-size:1rem;color:#e5e7eb;
+  position:absolute;
+  transform:rotate(90deg); 
+  font-weight:700;
+  font-size:1rem;
+  color:#e5e7eb;
 }
+
 .circular-progress {
   width: 80px;
   height: 80px;

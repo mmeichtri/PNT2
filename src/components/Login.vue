@@ -44,7 +44,8 @@ if (!existeAdmin) {
     } else if (usuarioGuardado.rol === 'admin') {
     router.push('/admin')
   } else {
-    router.push('/clients')
+    alumno = 
+    router.push(`/alumno/${usuarioGuardado.email}`)
   }
 }
 

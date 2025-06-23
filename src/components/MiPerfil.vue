@@ -13,20 +13,47 @@
       <p class="role">{{ userStore.loggedUser.rol }}</p>
       <div class="info">
         <p><strong>Email:</strong> {{ userStore.loggedUser.email }}</p>
+        <p><strong>Edad:</strong> {{ userStore.loggedUser.edad }}</p>
         <p><strong>Teléfono:</strong> {{ userStore.loggedUser.telefono || 'No disponible' }}</p>
+        <p><strong>Descripción:</strong> {{ userStore.loggedUser.objetivo }}</p>
+        <p><strong>Fecha de inicio:</strong> {{ userStore.loggedUser.fecha }}</p>
+        <div v-if="esAlumno" class="text-gray-400">
+          <p><strong>Entrenador: </strong> {{ userStore.entrenadorAsignado }}</p>
+        </div>
       </div>
-</div>
+      <div class="form-actions">
+          <button class="btn-modificar"  @click="modificar" type="submit">Modificar</button>
+          <button class="btn-eliminar"  @click="eliminarUsuario" type="submit">Eliminar usuario</button>
+      </div>
     </div>
-    <Sidebar/>
-  </div>
-   
+    </div>
+    </div>
 </template>
 
 <script setup>
 import { useUserStore } from '../stores/userStore'
-import Sidebar from './Sidebar.vue';
+import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const userStore = useUserStore()
+const router  = useRouter()
+const email = userStore.loggedUser.email
+
+function modificar(){
+  router.push({path: `/modificar/${email}`})
+}
+
+const esAlumno = computed(() => userStore.loggedUser.rol === 'cliente')
+
+function eliminarUsuario() {
+  const confirmar = confirm('¿Estás seguro de que querés eliminar tu usuario? Esta acción no se puede deshacer.')
+  if (!confirmar) return
+    const email = userStore.loggedUser.email
+    userStore.users = userStore.users.filter(u => u.email !== email)
+    userStore.loggedUser = null
+    userStore._guardarLocalStorage()
+    router.push('/')
+}
 
 </script>
 
@@ -38,17 +65,18 @@ const userStore = useUserStore()
 }
 .profile-container {
   flex: 1;
-    display: flex;
+  display: flex;
   justify-content: center;
   padding: 2rem;
-  background: #f0f2f5;
+  background-color: var(--color-background-dark);
   min-height: 100vh;
 }
 
 .profile-card {
-  background: rgb(228, 147, 147);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  background: rgba(0,0,0,0.3);
   padding: 2rem;
-  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 500px;
@@ -85,4 +113,19 @@ const userStore = useUserStore()
   margin: 0.5rem 0;
 }
 
+.btn-eliminar{
+  padding: 8px 16px;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  color: #e74c3c;
+  transition: 0.2s;
+}
+
+.btn-modificar{
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: var(--color-text-light);
+  transition: 0.2s;
+  background-color: var(--color-success)
+}
 </style>

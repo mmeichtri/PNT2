@@ -13,13 +13,16 @@ import MiPerfil from '../components/MiPerfil.vue'
 import Admin from '../components/Admin.vue'
 import SeleccionarEntrenador from '../components/SeleccionarEntrenador.vue'
 import AsignarRutina from '../components/AsignarRutina.vue'
+import ProgresoAlu from '../components/ProgresoAlu.vue'
+import ModificarDatos from '../components/ModificarDatos.vue'
+import RutinaDetalle  from '../components/RutinaDetalle.vue'
 
 const routes = [
     { path: '/', name: 'Home', component: Home},
    // { path: '/home', name: 'Home', component: Home},
     { path: '/login', name: 'login', component: Login},
     { path: '/register', name: 'Register', component: Register},
-    { path: '/routines', name: 'Routines', component: Routines},
+    // { path: '/routines', name: 'Routines', component: Routines},
     { path: '/clients', name: 'Clients', component: Clients},
     { path: '/results', name: 'Result', component: Result},
     { path: '/user', name: 'User', component: User},
@@ -28,7 +31,10 @@ const routes = [
     { path: '/alumnos', name: 'Alumnos', component: AlumnosView },
     {path: '/alumno/:email',name: 'AlumnoDetalleView',component: AlumnoDetalleView},
     {path: '/seleccionarEntrenador', name: 'SeleccionarEntrenador', component: SeleccionarEntrenador},
-    {path: '/asignarRutina/:email', name: 'AsignarRutina', component: AsignarRutina}
+    {path: '/asignarRutina/:email/:diaIndex', name: 'AsignarRutina', component: AsignarRutina},
+    {path: '/progreso', name: 'ProgresoAlu', component: ProgresoAlu},
+    {path: '/modificar:/:email/', name: 'ModificarDatos', component: ModificarDatos},
+    {path: '/verRutina/:email/:diaIdx', name: "RutinaDetalle", component: RutinaDetalle}
 ]
 
 const router = createRouter({ 

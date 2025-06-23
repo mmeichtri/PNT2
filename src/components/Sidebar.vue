@@ -1,4 +1,4 @@
-<script setup>
+ <script setup>
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
 import { ref, computed } from 'vue'
@@ -11,14 +11,14 @@ const menuItems = computed(() => {
   if (rol === 'entrenador') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil'},
-      { name: 'Mis alumnos', route: 'AlumnosView', icon: '👥', routeName: 'Alumnos' },
+      { name: 'Mis alumnos', route: 'User', icon: '👥', routeName: 'User' },
       { name: 'Rutinas', route: 'Rutinas', icon: '📋', routeName: 'MiPerfil'},
     ]
-  } else if (rol === 'Cliente') {
+  } else if (rol === 'cliente') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
       { name: 'Calendario', route: 'Calendario', icon: '📅', routeName: 'Clients' },
-      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'MiPerfil' },
+      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'ProgresoAlu' },
     ]
   } else if (rol === 'admin') {
     return [

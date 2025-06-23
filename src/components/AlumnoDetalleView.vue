@@ -42,9 +42,9 @@
             <span
               v-if="diaSeleccionado"
               class="estado-pill"
-              :class="diaSeleccionado.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'"
+              :class="estadoClase"
             >
-              {{ diaSeleccionado.hecho ? 'Completado' : 'Pendiente' }}
+              {{ estadoTexto }}
             </span>
           </div>
         </div>
@@ -142,6 +142,16 @@ const alumno = ref({
 const selectedDiaIndex = ref(0)
 const diaSeleccionado = computed(() => alumno.value.rutina[selectedDiaIndex.value])
 
+const estadoTexto = computed(() => {
+  if (diaSeleccionado.value?.esPlaceholder) return 'Sin rutina asignada'
+  return diaSeleccionado.value.hecho ? 'Completado' : 'Pendiente'
+})
+
+const estadoClase = computed(() => {
+  if (diaSeleccionado.value?.esPlaceholder) return 'estado-pill--sin'
+  return diaSeleccionado.value.hecho ? 'estado-pill--hecho' : 'estado-pill--pendiente'
+})
+
 function esHoy(diaRutina) {
   if (!diaRutina?.fechaOriginal) return false
   const fecha = new Date(diaRutina.fechaOriginal)
@@ -152,29 +162,36 @@ function esHoy(diaRutina) {
     fecha.getFullYear() === hoy.getFullYear()
   )
 }
+
 function selectDia(idx) { selectedDiaIndex.value = idx }
+
 function formatearFecha(fechaISO) {
   if (!fechaISO) return '--'
   const fecha = new Date(fechaISO)
   return fecha.getDate().toString().padStart(2, '0')
 }
+
 function asignarRutina() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function modificarRutinaDia() {
-    if (diaSeleccionado.value) {
-      diaSeleccionado.value.hecho = false;  
-      guardarEstadoDia(); 
-    }
+  if (diaSeleccionado.value) {
+    diaSeleccionado.value.hecho = false
+    guardarEstadoDia()
+  }
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function verRutina() {
   router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
+
 function obtenerNombreDia(fechaISO) {
   const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
   return dias[new Date(fechaISO).getDay()]
 }
+
 function abreviarDia(diaTexto) {
   const dias = { lunes:'Lun', martes:'Mar', miércoles:'Mie', jueves:'Jue', viernes:'Vie', sábado:'Sab', domingo:'Dom' }
   return dias[diaTexto.toLowerCase()] || diaTexto.slice(0, 3)
@@ -187,6 +204,7 @@ function guardarEstadoDia() {
     userStore._guardarLocalStorage()
   }
 }
+
 function marcarComoHecho() {
   diaSeleccionado.value.hecho = true
   guardarEstadoDia()
@@ -247,6 +265,10 @@ watch(() => route.params.email, cargarAlumno)
 </script>
 
 <style scoped>
+.estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
+.estado-pill--pendiente{ background:#fecaca;color:#7f1d1d; }
+.estado-pill--sin      { background:#facc15;color:#7c4701; }
+
 .btn-rutina, .btn-marcar, .addRoutine-link {
   padding: 8px 16px;
   border-radius: 6px;

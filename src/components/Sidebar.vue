@@ -24,7 +24,8 @@ const menuItems = computed(() => {
   } else if (rol === 'admin') {
     return [
       { name: 'Estadísticas', route: 'Estadísticas', icon: '📊', routeName: 'Admin' },
-      { name: 'Alumnos', route: 'AlumnosView', icon: '👥', routeName: 'AlumnosView' },
+      { name: 'Alumnos', route: 'AlumnosLista', icon: '👥', routeName: 'AlumnosLista' },
+    { name: 'Entrenadores', route: 'EntrenadoresLista', icon: '🧑‍🏫', routeName: 'EntrenadoresLista' },
     ]
   }
   return []

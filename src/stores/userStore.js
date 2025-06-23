@@ -10,7 +10,7 @@ export const useUserStore = defineStore('userStore', {
 
   getters: {
     entrenadores: (state) => state.users.filter(u => u.rol === 'entrenador'),
-
+alumnos: (state) => state.users.filter(u => u.rol === 'cliente'),
     alumnosDe: (state) => (emailEntrenador) =>
       state.users.filter(u => u.entrenadorAsignado === emailEntrenador),
     entrenadorConMasAlumnos: (state) => {

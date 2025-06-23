@@ -7,11 +7,10 @@ import { useUserStore } from '../stores/userStore'
 const route = useRoute()
 const userStore = useUserStore()
 
-const alumno = ref(null)
+const alumno        = ref(null)
 const diaSeleccionado = ref(null)
-const cargando = ref(true)
-
-const datosGrupo = reactive({})
+const cargando      = ref(true)
+const datosGrupo    = reactive({})
 
 async function fetchGrupo (grupo) {
   if (datosGrupo[grupo]) return
@@ -76,13 +75,13 @@ function abreviarDia (d) {
       >
         <h3 class="font-medium capitalize mb-3">{{ grupo }}</h3>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible">
           <div
             v-for="ej in ejercicios"
             :key="ej"
-            class="ej-card"
+            class="ej-wrapper"
           >
-            <div class="ej-content">
+            <div class="ej-card">
               <h4 class="ej-title">{{ ej }}</h4>
               <p class="ej-desc">
                 {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
@@ -92,7 +91,7 @@ function abreviarDia (d) {
             <img
               :src="datosGrupo[grupo]?.[ej]?.img || '/placeholder.png'"
               alt="img ejercicio"
-              class="ej-img"
+              class="ej-img-outside"
             />
           </div>
         </div>
@@ -132,27 +131,49 @@ function abreviarDia (d) {
   font-weight: 600;
   border-radius: 4px;
 }
+
+/* ------------- NUEVOS CONTENEDORES ------------- */
+.ej-wrapper {
+  position: relative;
+  display: flex;        /* mantiene el ancho de grid */
+}
+
+/* Tarjeta con el texto */
 .ej-card {
+  flex: 1 1 auto;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
-  padding: 1rem;
-  display: flex;             
-  align-items: flex-start;
-  gap: 1rem;
-}
-.ej-content {
-  flex: 1 1 auto;
+  padding: 1rem 1rem 1.5rem;
+  z-index: 1;           /* por encima del fondo, debajo de la imagen */
   display: flex;
   flex-direction: column;
   gap: .5rem;
 }
-.ej-img {
+
+.ej-title { font-weight: 600; }
+.ej-desc  { font-size: .875rem; color: #d1d5db; }
+
+/* Imagen posicionada fuera */
+.ej-img-outside {
+  position: absolute;
+  right: -20px;          /* separación hacia afuera */
+  top: 50%;
+  transform: translateY(-50%);
   width: 160px;
   height: 160px;
   object-fit: contain;
-  flex-shrink: 0;  
+  pointer-events: none;  /* evita clic accidental */
 }
-.ej-title { font-weight: 600; }
-.ej-desc  { font-size: .875rem; color: #d1d5db; }
+
+/* Ajuste en pantallas muy chicas: mete la imagen adentro */
+@media (max-width: 480px) {
+  .ej-img-outside {
+    position: static;
+    transform: none;
+    width: 100px;
+    height: 100px;
+    margin: 0.5rem auto 0;
+  }
+}
 </style>

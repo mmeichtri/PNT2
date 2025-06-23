@@ -258,6 +258,7 @@ watch(() => route.params.email, cargarAlumno)
 .btn-marcar{ 
   background: var(--color-success);
   color: var(--color-text-light)
+
 }
 .btn-marcar:hover{ 
   background: #059669;

@@ -18,21 +18,13 @@
       <button class="btn-elegir" @click="irASeleccionEntrenador">Elegir entrenador</button>
     </div>
 
-    <!-- SOLO PARA CLIENTES CON ENTRENADOR ASIGNADO -->
     <div
       v-if="isCliente && userStore.loggedUser?.entrenadorAsignado"
       class="entrenador-asignado-card"
     >
-      <p>¡Ya tienes un entrenador asignado! Si quieres cambiarlo, contacta al soporte.</p>
+      <p>¡Ya tienes un entrenador asignado! Si quieres cambiarlo, puedes hacerlo desde tu perfil.</p>
     </div>
     </div>
-
-
-  <!-- <section class="promo">
-    <h2>🏷️ ¡Descuento especial para grupos familiares!</h2>
-    <p>Entrena junto a tus seres queridos con <strong>30% de descuento</strong>.</p>
-    <router-link to="/login" class="cta-promo">Aprovechar promoción</router-link>
-  </section> -->
 </template>
 
 <script setup>

@@ -24,6 +24,18 @@
         <div class="form-row">
           <input v-model="user.descripcion" type="text" placeholder="Descripción" />
         </div>
+        <div class="form-row">
+          <select v-model="user.entrenadorAsignado" class="input-like" required>
+            <option disabled value="">Seleccioná un entrenador</option>
+            <option
+              v-for="e in entrenadores"
+              :key="e.email"
+              :value="e.email"
+            >
+              {{ e.nombre }} {{ e.apellido }} ({{ e.email }})
+            </option>
+          </select>
+        </div>
 
       </div>
       <div class="form-actions">
@@ -37,7 +49,7 @@
 <script setup>
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 
 const userStore = useUserStore()
 const router  = useRouter()
@@ -56,6 +68,17 @@ function guardar () {
   }
 }
 
+const entrenadores = computed(() =>
+  userStore.users.filter(u => u.rol === 'entrenador')
+)
+
+const entrenadorActual = computed(() =>
+  entrenadores.value.find(e => e.email === user.entrenadorAsignado)
+)
+
+const otrosEntrenadores = computed(() =>
+  entrenadores.value.filter(e => e.email !== user.entrenadorAsignado)
+)
 </script>
 
 <style scoped>
@@ -91,6 +114,28 @@ function guardar () {
   border-radius: 50%;
   margin-bottom: 1rem;
 }
+
+.form-row {
+  margin-bottom: 1rem;
+}
+
+.input-like {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0,5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f5f5f5;
+  color: #000;
+  transition: border-color 0.3s ease;
+}
+
+.input-like:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: #fff;
+}
+
 
 .username {
   font-size: 1.8rem;

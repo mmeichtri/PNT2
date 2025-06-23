@@ -17,6 +17,9 @@
         <p><strong>Teléfono:</strong> {{ userStore.loggedUser.telefono || 'No disponible' }}</p>
         <p><strong>Descripción:</strong> {{ userStore.loggedUser.objetivo }}</p>
         <p><strong>Fecha de inicio:</strong> {{ userStore.loggedUser.fecha }}</p>
+        <div v-if="esAlumno" class="text-gray-400">
+          <p><strong>Entrenador: </strong> {{ userStore.entrenadorAsignado }}</p>
+        </div>
       </div>
       <div class="form-actions">
           <button class="btn-modificar"  @click="modificar" type="submit">Modificar</button>
@@ -30,6 +33,7 @@
 <script setup>
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const userStore = useUserStore()
 const router  = useRouter()
@@ -39,6 +43,7 @@ function modificar(){
   router.push({path: '/modificar/${email}'})
 }
 
+const esAlumno = computed(() => userStore.loggedUser.rol === 'cliente')
 
 function eliminarUsuario() {
   const confirmar = confirm('¿Estás seguro de que querés eliminar tu usuario? Esta acción no se puede deshacer.')

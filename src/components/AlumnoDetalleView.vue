@@ -40,7 +40,7 @@
             </template>
 
             <span
-              v-if="diaSeleccionado"
+              v-if="diaSeleccionado && !isTrainer"
               class="estado-pill"
               :class="estadoClase"
             >
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div v-if="sinRutinaAlumno && !isTrainer" class="text-gray-400">
+        <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400">
           Sin rutina asignada aún.
         </div>
 

@@ -70,7 +70,6 @@
             </li>
           </ul>
 
-          <!-- Botón “Marcar como realizado” -->
           <div v-if="!isTrainer && !diaSeleccionado.esPlaceholder && !diaSeleccionado.hecho">
             <button class="btn-marcar" @click="marcarComoHecho">
               Marcar como realizado
@@ -257,7 +256,8 @@ watch(() => route.params.email, cargarAlumno)
   color: var(--color-text-light); 
 }
 .btn-marcar{ 
-  background: #10b981; color:#fff; 
+  background: var(--color-success);
+  color: var(--color-text-light)
 }
 .btn-marcar:hover{ 
   background: #059669;

@@ -82,8 +82,9 @@
       <section class="mt-10 w-full">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-        <div v-if="alumno.rutina.length && progresoTotal > 0" class="mb-6 flex items-center gap-4">
-          <div class="circular-progress">
+        <!-- Mostrar siempre el círculo, incluso con 0% -->
+        <div class="mb-6 flex items-center gap-4">
+          <div class="circular-progress" role="img" aria-label="Progreso total">
             <svg viewBox="0 0 36 36" class="circular-chart">
               <path
                 class="circle-bg"
@@ -104,7 +105,7 @@
           <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
-        <ul class="space-y-2">
+        <ul class="space-y-2" v-if="alumno.progreso.length > 0">
           <li
             v-for="(item, i) in alumno.progreso"
             :key="'prog-'+i"
@@ -394,35 +395,6 @@ watch(() => route.params.email, cargarAlumno)
   color:#7f1d1d;
 }
 
-.progress-circle {
-  --porcentaje:0;
-  width:110px;
-  height:110px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  background:conic-gradient(#c5ff5d calc(var(--porcentaje)*1%), #3f3f3f 0deg);
-  transform:rotate(0deg); 
-}
-
-.progress-circle::after {
-  content:'';
-  position:absolute;
-  inset:13px;
-  background:var(--color-background-dark);
-  border-radius:50%;
-}
-
-.progress-text {
-  position:absolute;
-  transform:rotate(90deg); 
-  font-weight:700;
-  font-size:1rem;
-  color:#e5e7eb;
-}
-
 .circular-progress {
   width: 80px;
   height: 80px;
@@ -457,6 +429,4 @@ watch(() => route.params.email, cargarAlumno)
   font-size: 0.32em;
   text-anchor: middle;
 }
-
-
 </style>

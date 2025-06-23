@@ -1,6 +1,6 @@
 <template>
   <div class="asignarRutinaPage">
-    <h1 class="text-2xl font-bold mb-8 text-center w-full">
+    <h1 class="tituloRutina text-center mb-8 w-full">
       {{ diaIndexEditando !== null ? `Editar rutina del ${diasMostrados[0]}` : `Asignar rutina a ${alumno.nombre}` }}
     </h1>
 
@@ -370,6 +370,16 @@ function volverVistaAlumno() {
   flex-direction: column;
 }
 
+.tituloRutina {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #c5ff5d;
+  text-shadow:
+    0 0 10px #a0d911,
+    0 0 15px #a0d911,
+    0 0 20px #84cc16;
+  margin-bottom: 2rem;
+}
 
 .form-card {
   background: rgb(31 41 55 / 0.8);

@@ -40,7 +40,7 @@ const router  = useRouter()
 const email = userStore.loggedUser.email
 
 function modificar(){
-  router.push({path: '/modificar/${email}'})
+  router.push({path: `/modificar/${email}`})
 }
 
 const esAlumno = computed(() => userStore.loggedUser.rol === 'cliente')

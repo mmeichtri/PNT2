@@ -23,7 +23,7 @@ const routes = [
     { path: '/login', name: 'login', component: Login},
     { path: '/register', name: 'Register', component: Register},
     // { path: '/routines', name: 'Routines', component: Routines},
-    // { path: '/clients', name: 'Clients', component: Clients},
+    { path: '/clients', name: 'Clients', component: Clients},
     { path: '/results', name: 'Result', component: Result},
     { path: '/user', name: 'User', component: User},
     {path: '/miPerfil',  name: 'MiPerfil',component: MiPerfil },

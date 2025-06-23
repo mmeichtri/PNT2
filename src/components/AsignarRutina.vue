@@ -78,6 +78,22 @@
                     {{ nombre }}
                   </option>
                 </select>
+
+                <input
+                  type="number"
+                  min="1"
+                  v-model="seriesTemporal[dia][grupo]"
+                  class="input-mini"
+                  placeholder="Series"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  v-model="repeticionesTemporal[dia][grupo]"
+                  class="input-mini"
+                  placeholder="Reps"
+                />
+
                 <button
                   type="button"
                   class="btn-add"
@@ -94,15 +110,15 @@
             >
               <li
                 v-for="e in ejerciciosSeleccionados[dia][grupo]"
-                :key="e"
+                :key="e.nombre"
                 class="tag-item"
               >
-                {{ e }}
+                {{ e.nombre }} ({{ e.series }}x{{ e.repeticiones }})
                 <button
                   v-if="!rutinaGuardada[dia]"
                   type="button"
                   class="hover:text-yellow-300"
-                  @click="quitarEjercicio(dia, grupo, e)"
+                  @click="quitarEjercicio(dia, grupo, e.nombre)"
                 >×</button>
               </li>
             </ul>
@@ -121,6 +137,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -143,6 +160,8 @@ const ejerciciosPorGrupo = ref({})
 const detallesEjercicios = ref({})
 const ejerciciosSeleccionados = ref({})
 const ejercicioTemporal = ref({})
+const seriesTemporal = ref({})
+const repeticionesTemporal = ref({})
 const rutinaGuardada = ref({})
 const cargandoEjercicios = ref({})
 const errorEjercicios = ref({})
@@ -152,6 +171,8 @@ function initDia(dia) {
   gruposDropdown.value[dia] = ''
   ejerciciosSeleccionados.value[dia] = {}
   ejercicioTemporal.value[dia] = {}
+  seriesTemporal.value[dia] = {}
+  repeticionesTemporal.value[dia] = {}
   rutinaGuardada.value[dia] = false
 }
 
@@ -179,7 +200,6 @@ async function cargarAlumno() {
 
   alumno.value = encontrado
 
-  // Si viene un índice, se está editando solo un día
   if (route.params.diaIndex !== undefined) {
     diaIndexEditando.value = parseInt(route.params.diaIndex)
     const rutinaDia = alumno.value.rutina[diaIndexEditando.value]
@@ -197,6 +217,8 @@ function agregarGrupoManual(dia, grupo, ejercicios = []) {
     gruposPorDia.value[dia].push(grupo)
     ejerciciosSeleccionados.value[dia][grupo] = ejercicios
     ejercicioTemporal.value[dia][grupo] = ''
+    seriesTemporal.value[dia][grupo] = ''
+    repeticionesTemporal.value[dia][grupo] = ''
     cargarEjercicios(grupo)
   }
 }
@@ -248,22 +270,31 @@ function quitarGrupo(dia, grupo) {
 }
 
 function agregarEjercicio(dia, grupo) {
-  const ejercicio = ejercicioTemporal.value[dia][grupo]
-  if (!ejercicio) return
+  const nombre = ejercicioTemporal.value[dia][grupo]
+  const series = parseInt(seriesTemporal.value[dia][grupo]) || 0
+  const repeticiones = parseInt(repeticionesTemporal.value[dia][grupo]) || 0
+
+  if (!nombre || series <= 0 || repeticiones <= 0) return
+
   const lista = ejerciciosSeleccionados.value[dia][grupo]
-  if (!lista.includes(ejercicio)) lista.push(ejercicio)
+  if (!lista.find(e => e.nombre === nombre)) {
+    lista.push({ nombre, series, repeticiones })
+  }
+
   ejercicioTemporal.value[dia][grupo] = ''
+  seriesTemporal.value[dia][grupo] = ''
+  repeticionesTemporal.value[dia][grupo] = ''
 }
 
-function quitarEjercicio(dia, grupo, ejercicio) {
-  ejerciciosSeleccionados.value[dia][grupo] = ejerciciosSeleccionados.value[dia][grupo].filter(x => x !== ejercicio)
+function quitarEjercicio(dia, grupo, nombre) {
+  ejerciciosSeleccionados.value[dia][grupo] = ejerciciosSeleccionados.value[dia][grupo].filter(e => e.nombre !== nombre)
 }
 
 function resumenDia(dia) {
   return Object.keys(ejerciciosSeleccionados.value[dia] || {}).map(grupo => ({
     id: `${dia}-${grupo}`,
     grupo,
-    ejercicios: ejerciciosSeleccionados.value[dia][grupo]
+    ejercicios: ejerciciosSeleccionados.value[dia][grupo].map(e => `${e.nombre} (${e.series}x${e.repeticiones})`)
   }))
 }
 
@@ -289,8 +320,9 @@ function guardarRutinaDia(dia) {
     dia,
     descripcion: {}
   }
-  detalle.forEach(item => {
-    nuevoDiaRutina.descripcion[item.grupo] = item.ejercicios
+
+  gruposPorDia.value[dia].forEach(grupo => {
+    nuevoDiaRutina.descripcion[grupo] = ejerciciosSeleccionados.value[dia][grupo]
   })
 
   const indiceDia = alumno.value.rutina.findIndex(r => r.dia === dia)
@@ -340,7 +372,7 @@ function volverVistaAlumno() {
 
 
 .form-card {
-  background: rgb(31 41 55 / 0.8); /* bg-gray-800/80 */
+  background: rgb(31 41 55 / 0.8);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -353,9 +385,7 @@ function volverVistaAlumno() {
   color: #d1d5db;
 }
 
-/******************
-  CAMPOS EN LÍNEA
-*******************/
+
 .inline-field {
   display: flex;
   align-items: center;
@@ -378,25 +408,19 @@ function volverVistaAlumno() {
   font-size: 0.875rem;
 }
 
-/******************
-  SECCIÓN GRUPO
-*******************/
 .grupo-card {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-/******************
-  TAGS EJERCICIO
-*******************/
 .tags-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 .tag-item {
-  background: rgb(37 99 235 / 0.8); /* bg-blue-600/80 */
+  background: rgb(37 99 235 / 0.8);
   color: #fff;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;

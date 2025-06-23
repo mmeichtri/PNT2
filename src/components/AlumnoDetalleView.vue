@@ -162,6 +162,10 @@ function asignarRutina() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 function modificarRutinaDia() {
+    if (diaSeleccionado.value) {
+      diaSeleccionado.value.hecho = false;  
+      guardarEstadoDia(); 
+    }
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 function verRutina() {

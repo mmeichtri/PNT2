@@ -1,3 +1,54 @@
+<template>
+  <button @click="$router.back()" class="volver-btn">← Volver</button>
+
+  <section class="detalleViewContainer">
+    <div v-if="cargando" class="text-white">Cargando rutina…</div>
+
+    <div v-else-if="!alumno || !diaSeleccionado" class="text-red-400">
+      No se pudo cargar la rutina del día.
+    </div>
+
+    <div v-else class="detalleViewPage">
+      <h1 class="text-2xl font-bold mb-8 text-center">
+        Rutina de {{ alumno.nombre }} – {{ abreviarDia(diaSeleccionado.dia) }}
+      </h1>
+
+      <div
+        v-for="(ejercicios, grupo) in diaSeleccionado.descripcion"
+        :key="grupo"
+        class="mb-10"
+      >
+        <h3 class="font-medium capitalize mb-4 text-lg">{{ grupo }}</h3>
+
+        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Ejercicios -->
+          <div
+            v-for="ej in ejercicios"
+            :key="typeof ej === 'string' ? ej : ej.nombre"
+            class="ej-card"
+          >
+            <div class="ej-content">
+              <h4 class="ej-title">
+                {{ typeof ej === 'string' ? ej : ej.nombre }}
+                <span v-if="typeof ej !== 'string'" class="ej-series">({{ ej.series }}x{{ ej.repeticiones }})</span>
+              </h4>
+              <p class="ej-desc">
+                {{ datosGrupo[grupo]?.[typeof ej === 'string' ? ej : ej.nombre]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
+              </p>
+            </div>
+
+            <img
+              :src="datosGrupo[grupo]?.[typeof ej === 'string' ? ej : ej.nombre]?.img || '/placeholder.png'"
+              alt="Imagen ejercicio"
+              class="ej-img"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -7,10 +58,12 @@ import { useUserStore } from '../stores/userStore'
 const route = useRoute()
 const userStore = useUserStore()
 
-const alumno        = ref(null)
+const alumno = ref(null)
 const diaSeleccionado = ref(null)
-const cargando      = ref(true)
-const datosGrupo    = reactive({})
+const cargando = ref(true)
+
+/*  grupo → objEjercicios  */
+const datosGrupo = reactive({})
 
 async function fetchGrupo (grupo) {
   if (datosGrupo[grupo]) return
@@ -53,54 +106,8 @@ function abreviarDia (d) {
 }
 </script>
 
-<template>
-  <button @click="$router.back()" class="volver-btn">← Volver</button>
-
-  <section class="detalleViewContainer">
-    <div v-if="cargando" class="text-white">Cargando rutina…</div>
-
-    <div v-else-if="!alumno || !diaSeleccionado" class="text-red-400">
-      No se pudo cargar la rutina del día.
-    </div>
-
-    <div v-else class="detalleViewPage">
-      <h1 class="text-2xl font-bold mb-6 text-center">
-        Rutina de {{ alumno.nombre }} – {{ abreviarDia(diaSeleccionado.dia) }}
-      </h1>
-
-      <div
-        v-for="(ejercicios, grupo) in diaSeleccionado.descripcion"
-        :key="grupo"
-        class="mb-8"
-      >
-        <h3 class="font-medium capitalize mb-3">{{ grupo }}</h3>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible">
-          <div
-            v-for="ej in ejercicios"
-            :key="ej"
-            class="ej-wrapper"
-          >
-            <div class="ej-card">
-              <h4 class="ej-title">{{ ej }}</h4>
-              <p class="ej-desc">
-                {{ datosGrupo[grupo]?.[ej]?.descripcion?.ejecucion || 'Descripción no disponible.' }}
-              </p>
-            </div>
-
-            <img
-              :src="datosGrupo[grupo]?.[ej]?.img || '/placeholder.png'"
-              alt="img ejercicio"
-              class="ej-img-outside"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</template>
-
 <style scoped>
+/************* Layout general *************/
 .detalleViewContainer {
   width: 100vw;
   min-height: 100vh;
@@ -118,7 +125,7 @@ function abreviarDia (d) {
   background: rgba(0,0,0,0.35);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
-  padding: 2rem 2rem;
+  padding: 2rem;
 }
 .volver-btn {
   position: absolute;
@@ -132,48 +139,40 @@ function abreviarDia (d) {
   border-radius: 4px;
 }
 
-/* ------------- NUEVOS CONTENEDORES ------------- */
-.ej-wrapper {
-  position: relative;
-  display: flex;        /* mantiene el ancho de grid */
-}
-
-/* Tarjeta con el texto */
+/************* Tarjeta ejercicio *************/
 .ej-card {
-  flex: 1 1 auto;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
-  padding: 1rem 1rem 1.5rem;
-  z-index: 1;           /* por encima del fondo, debajo de la imagen */
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.ej-content {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: .5rem;
 }
-
 .ej-title { font-weight: 600; }
-.ej-desc  { font-size: .875rem; color: #d1d5db; }
-
-/* Imagen posicionada fuera */
-.ej-img-outside {
-  position: absolute;
-  right: -20px;          /* separación hacia afuera */
-  top: 50%;
-  transform: translateY(-50%);
+.ej-series { font-size: 0.875rem; font-weight: 500; margin-left: 4px; color: #cbd5e1; }
+.ej-desc  { font-size: 0.875rem; color: #d1d5db; }
+.ej-img {
   width: 160px;
   height: 160px;
   object-fit: contain;
-  pointer-events: none;  /* evita clic accidental */
+  flex-shrink: 0;
 }
 
-/* Ajuste en pantallas muy chicas: mete la imagen adentro */
 @media (max-width: 480px) {
-  .ej-img-outside {
-    position: static;
-    transform: none;
-    width: 100px;
-    height: 100px;
-    margin: 0.5rem auto 0;
+  .ej-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ej-img {
+    width: 120px;
+    height: 120px;
   }
 }
 </style>

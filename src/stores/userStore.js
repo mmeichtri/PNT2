@@ -10,7 +10,7 @@ export const useUserStore = defineStore('userStore', {
 
   getters: {
     entrenadores: (state) => state.users.filter(u => u.rol === 'entrenador'),
-
+alumnos: (state) => state.users.filter(u => u.rol === 'cliente'),
     alumnosDe: (state) => (emailEntrenador) =>
       state.users.filter(u => u.entrenadorAsignado === emailEntrenador),
     entrenadorConMasAlumnos: (state) => {
@@ -54,7 +54,7 @@ entrenadorConMasClientesActivos: (state) => {
         ...nuevoUsuario,
         entrenadorAsignado: null,
         rutinasHechas: 0 ,  
-        rutinas: []  
+        rutina: []  
       })
 
       this._guardarLocalStorage()
@@ -90,15 +90,22 @@ entrenadorConMasClientesActivos: (state) => {
     },
 
     loadUserFromStorage() {
-      this.loggedUser = JSON.parse(localStorage.getItem('loggedUser')) || null
-      this.users = JSON.parse(localStorage.getItem('users')) || []
-    },
+  const storedUser = JSON.parse(localStorage.getItem('loggedUser')) || null
+  if (storedUser) {
+    storedUser.rutinas = storedUser.rutinas || []
+    storedUser.rutinasHechas = storedUser.rutinasHechas || 0
+  }
+  this.loggedUser = storedUser
+  this.users = JSON.parse(localStorage.getItem('users')) || []
+},
+
     
 
     _guardarLocalStorage() {
       localStorage.setItem('loggedUser', JSON.stringify(this.loggedUser))
       localStorage.setItem('users', JSON.stringify(this.users))
     },
+    
     sumarRutinaHecha(emailCliente) {
   const i = this.users.findIndex(u => u.email === emailCliente)
   if (i !== -1 && this.users[i].rol === 'cliente') {

@@ -8,7 +8,6 @@
     </div>
 
     <div v-else class="detalleViewPage">
-      <!-- ──────────── Cabecera ──────────── -->
       <header class="flex flex-col items-center gap-2 mb-8">
         <div class="avatar-wrapper">
           <img :src="alumno.foto || '/avatar-default.png'" alt="avatar alumno" />
@@ -20,7 +19,6 @@
         </div>
       </header>
 
-      <!-- ──────────── Rutina ──────────── -->
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
@@ -50,11 +48,9 @@
         </div>
 
         <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400">
-          Sin rutina asignada aún.
         </div>
 
         <div v-else>
-          <!-- Selector de días -->
           <ul class="dias-selector">
             <li v-for="(diaRutina, idx) in alumno.rutina" :key="'dia-'+idx">
               <button
@@ -62,10 +58,12 @@
                 :class="{ 'dia-pill--activo': idx === selectedDiaIndex }"
                 @click="selectDia(idx)"
               >
+                <span class="dia-pill-fecha">
+                  {{ formatearFecha(diaRutina.fechaOriginal) }}
+                </span>
                 <span class="dia-pill-dia">
                   {{ esHoy(diaRutina) ? 'Hoy ' + abreviarDia(diaRutina.dia) : abreviarDia(diaRutina.dia) }}
                 </span>
-                <span class="dia-pill-fecha">{{ diaRutina.diaNumero }}</span>
               </button>
             </li>
           </ul>
@@ -78,11 +76,9 @@
         </div>
       </section>
 
-      <!-- ──────────── Progreso ──────────── -->
       <section class="mt-10 w-full">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-        <!-- Mostrar siempre el círculo, incluso con 0% -->
         <div class="mb-6 flex items-center gap-4">
           <div class="circular-progress" role="img" aria-label="Progreso total">
             <svg viewBox="0 0 36 36" class="circular-chart">
@@ -105,7 +101,7 @@
           <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
-        <ul class="space-y-2" v-if="alumno.progreso.length > 0">
+        <ul class="space-y-2" v-if="alumno.progreso?.length > 0"> 
           <li
             v-for="(item, i) in alumno.progreso"
             :key="'prog-'+i"
@@ -121,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 
@@ -164,11 +160,18 @@ function esHoy(diaRutina) {
   )
 }
 
+function fechaCompleta(diaRutina) {
+  if (!diaRutina?.fechaOriginal) return ''
+  const fecha = new Date(diaRutina.fechaOriginal)
+  const opciones = { weekday: 'long', day: '2-digit', month: '2-digit' }
+  return fecha.toLocaleDateString('es-AR', opciones)
+}
+
 function selectDia(idx) { selectedDiaIndex.value = idx }
 
 function formatearFecha(fechaISO) {
   if (!fechaISO) return '--'
-  const fecha = new Date(fechaISO)
+  const fecha = new Date(typeof fechaISO === 'string' ? fechaISO : fechaISO.toISOString())
   return fecha.getDate().toString().padStart(2, '0')
 }
 
@@ -207,15 +210,19 @@ function guardarEstadoDia() {
 }
 
 function marcarComoHecho() {
-  diaSeleccionado.value.hecho = true
+  alumno.value = { ...alumno.value }
+  alumno.value.rutina[selectedDiaIndex.value].hecho = true
   guardarEstadoDia()
+  userStore.sumarRutinaHecha(alumno.value.email)
 }
 
-async function cargarAlumno(email) {
+async function cargarAlumno() {
   cargando.value = true
   await userStore.loadUserFromStorage()
 
+  const email = route.params.email
   const encontrado = userStore.users.find(u => u.email === email)
+
   if (encontrado) {
     const rutinaMapeada = (encontrado.rutina || []).map(d => {
       const nombreDia = d.dia ?? obtenerNombreDia(d.fecha)
@@ -228,27 +235,50 @@ async function cargarAlumno(email) {
       }
     })
 
-    const diasSemana = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']
-    const rutinaCompleta = diasSemana.map(diaTexto => {
-      const existente = rutinaMapeada.find(r => r.dia.toLowerCase() === diaTexto)
+    // Normalizador para comparar sin acentos ni mayúsculas
+    const normalizar = str => str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase()
+
+    function obtenerFechasSemanaActual() {
+      const hoy = new Date()
+      const diaSemana = hoy.getDay() // 0: domingo ... 6: sábado
+      const lunes = new Date(hoy)
+      lunes.setDate(hoy.getDate() - ((diaSemana + 6) % 7)) // ir al lunes
+
+      const dias = []
+      for (let i = 0; i < 7; i++) {
+        const fecha = new Date(lunes)
+        fecha.setDate(lunes.getDate() + i)
+        dias.push(fecha)
+      }
+      return dias
+    }
+
+    const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
+    const fechasSemana = obtenerFechasSemanaActual()
+
+    const rutinaCompleta = diasSemana.map((diaTexto, i) => {
+      const fecha = fechasSemana[i]
+      const existente = rutinaMapeada.find(r => normalizar(r.dia) === normalizar(diaTexto))
       return existente ?? {
         dia: diaTexto,
-        diaNumero: '--',
+        diaNumero: formatearFecha(fecha.toISOString()),
         hecho: false,
-        fechaOriginal: null,
+        fechaOriginal: fecha.toISOString(),
         esPlaceholder: true
       }
     })
 
-    alumno.value = { ...alumno.value, ...encontrado, rutina: rutinaCompleta }
+    alumno.value = { ...encontrado, rutina: rutinaCompleta }
 
     const hoyIdx = rutinaCompleta.findIndex(r => esHoy(r))
     selectedDiaIndex.value = hoyIdx !== -1 ? hoyIdx : 0
   } else {
     alumno.value = { email: '' }
   }
+
   cargando.value = false
 }
+
 
 const isTrainer        = computed(() => userStore.loggedUser?.rol === 'entrenador')
 const diaTieneRutina   = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
@@ -261,9 +291,16 @@ const porcentajeProgreso = computed(() => {
 })
 const sinRutinaAlumno  = computed(() => progresoTotal.value === 0)
 
-cargarAlumno(route.params.email)
-watch(() => route.params.email, cargarAlumno)
+onMounted(() => {
+  cargarAlumno()
+})
+
+watch(() => route.fullPath, () => {
+  cargarAlumno()
+})
 </script>
+
+
 
 <style scoped>
 .estado-pill--hecho    { background:#bbf7d0;color:#065f46; }
@@ -357,18 +394,29 @@ watch(() => route.params.email, cargarAlumno)
 .dia-pill:hover{ 
   transform:translateY(-2px); 
 }
-.dia-pill-dia{ 
-  font-size:.85rem;font-weight:600;color:#d1d5db;
+.dia-pill-dia {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #d1d5db;
+  line-height: 1.1;
+  text-align: center;
 }
-.dia-pill-fecha{ 
-  width:34px;height:34px;border-radius:50%;
-  background:#777;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;color:#fff;
-  font-size:.85rem;
+
+.dia-pill-fecha {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.75rem; 
+  text-align: center;
+  line-height: 1.1;
 }
+
 .dia-pill--activo{ 
   background:#c5ff5d;
   transform:scale(1.05);

@@ -8,7 +8,6 @@
     </div>
 
     <div v-else class="detalleViewPage">
-      <!-- ──────────── Cabecera ──────────── -->
       <header class="flex flex-col items-center gap-2 mb-8">
         <div class="avatar-wrapper">
           <img :src="alumno.foto || '/avatar-default.png'" alt="avatar alumno" />
@@ -20,7 +19,6 @@
         </div>
       </header>
 
-      <!-- ──────────── Rutina ──────────── -->
       <section class="w-full">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
@@ -50,11 +48,9 @@
         </div>
 
         <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400">
-          Sin rutina asignada aún.
         </div>
 
         <div v-else>
-          <!-- Selector de días -->
           <ul class="dias-selector">
             <li v-for="(diaRutina, idx) in alumno.rutina" :key="'dia-'+idx">
               <button
@@ -78,11 +74,9 @@
         </div>
       </section>
 
-      <!-- ──────────── Progreso ──────────── -->
       <section class="mt-10 w-full">
         <h2 class="text-2xl font-semibold mb-3">Progreso</h2>
 
-        <!-- Mostrar siempre el círculo, incluso con 0% -->
         <div class="mb-6 flex items-center gap-4">
           <div class="circular-progress" role="img" aria-label="Progreso total">
             <svg viewBox="0 0 36 36" class="circular-chart">
@@ -121,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 
@@ -211,10 +205,11 @@ function marcarComoHecho() {
   guardarEstadoDia()
 }
 
-async function cargarAlumno(email) {
+async function cargarAlumno() {
   cargando.value = true
   await userStore.loadUserFromStorage()
 
+  const email = route.params.email
   const encontrado = userStore.users.find(u => u.email === email)
   if (encontrado) {
     const rutinaMapeada = (encontrado.rutina || []).map(d => {
@@ -240,7 +235,7 @@ async function cargarAlumno(email) {
       }
     })
 
-    alumno.value = { ...alumno.value, ...encontrado, rutina: rutinaCompleta }
+    alumno.value = { ...encontrado, rutina: rutinaCompleta }
 
     const hoyIdx = rutinaCompleta.findIndex(r => esHoy(r))
     selectedDiaIndex.value = hoyIdx !== -1 ? hoyIdx : 0
@@ -251,7 +246,7 @@ async function cargarAlumno(email) {
 }
 
 const isTrainer        = computed(() => userStore.loggedUser?.rol === 'entrenador')
-const diaTieneRutina   = computed(() => diaSeleccionado.value)
+const diaTieneRutina   = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
 const progresoTotal    = computed(() => alumno.value.rutina.filter(r => !r.esPlaceholder).length)
 const porcentajeProgreso = computed(() => {
   const total = progresoTotal.value
@@ -261,9 +256,15 @@ const porcentajeProgreso = computed(() => {
 })
 const sinRutinaAlumno  = computed(() => progresoTotal.value === 0)
 
-cargarAlumno(route.params.email)
-watch(() => route.params.email, cargarAlumno)
+onMounted(() => {
+  cargarAlumno()
+})
+
+watch(() => route.fullPath, () => {
+  cargarAlumno()
+})
 </script>
+
 
 <style scoped>
 .estado-pill--hecho    { background:#bbf7d0;color:#065f46; }

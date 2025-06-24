@@ -139,7 +139,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
@@ -151,7 +151,6 @@ const userStore = useUserStore()
 const alumno = ref({})
 const musculos = ref([])
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-const diaIndexEditando = ref(null)
 
 const gruposPorDia = ref({})
 const gruposDropdown = ref({})
@@ -164,15 +163,17 @@ const repeticionesTemporal = ref({})
 const rutinaGuardada = ref({})
 const cargandoEjercicios = ref({})
 const errorEjercicios = ref({})
+const diaIndexEditando = ref(null)
 
 function initDia(dia) {
-  gruposPorDia.value[dia] = []
-  gruposDropdown.value[dia] = ''
-  ejerciciosSeleccionados.value[dia] = {}
-  ejercicioTemporal.value[dia] = {}
-  seriesTemporal.value[dia] = {}
-  repeticionesTemporal.value[dia] = {}
-  rutinaGuardada.value[dia] = false
+  const diaNormalizado = dia.toLowerCase()
+  gruposPorDia.value[diaNormalizado] = []
+  gruposDropdown.value[diaNormalizado] = ''
+  ejerciciosSeleccionados.value[diaNormalizado] = {}
+  ejercicioTemporal.value[diaNormalizado] = {}
+  seriesTemporal.value[diaNormalizado] = {}
+  repeticionesTemporal.value[diaNormalizado] = {}
+  rutinaGuardada.value[diaNormalizado] = false
 }
 
 diasSemana.forEach(initDia)
@@ -197,28 +198,40 @@ async function cargarAlumno() {
   const encontrado = userStore.users.find(u => u.email === email)
   if (!encontrado) return
 
-  alumno.value = encontrado
+  alumno.value = { ...encontrado }
+  if (!alumno.value.rutina) alumno.value.rutina = []
 
   if (route.params.diaIndex !== undefined) {
     diaIndexEditando.value = parseInt(route.params.diaIndex)
+    const dia = diasSemana[diaIndexEditando.value]
+    initDia(dia)
+
     const rutinaDia = alumno.value.rutina[diaIndexEditando.value]
     if (rutinaDia) {
-      rutinaGuardada.value[rutinaDia.dia] = false
+      const diaNorm = rutinaDia.dia.toLowerCase()
+      rutinaGuardada.value[diaNorm] = false
       Object.entries(rutinaDia.descripcion).forEach(([grupo, ejercicios]) => {
-        agregarGrupoManual(rutinaDia.dia, grupo, ejercicios)
+        agregarGrupoManual(diaNorm, grupo, ejercicios)
       })
     }
   }
 }
 
-function agregarGrupoManual(dia, grupo, ejercicios = []) {
+const diasMostrados = computed(() => {
+  if (diaIndexEditando.value !== null) {
+    return [diasSemana[diaIndexEditando.value]]
+  }
+  return diasSemana
+})
+
+async function agregarGrupoManual(dia, grupo, ejercicios = []) {
   if (!gruposPorDia.value[dia].includes(grupo)) {
     gruposPorDia.value[dia].push(grupo)
     ejerciciosSeleccionados.value[dia][grupo] = ejercicios
     ejercicioTemporal.value[dia][grupo] = ''
     seriesTemporal.value[dia][grupo] = ''
     repeticionesTemporal.value[dia][grupo] = ''
-    cargarEjercicios(grupo)
+    await cargarEjercicios(grupo)
   }
 }
 
@@ -253,97 +266,99 @@ async function cargarEjercicios(grupo) {
 }
 
 function gruposDisponibles(dia) {
-  return musculos.value.filter(m => !gruposPorDia.value[dia].includes(m))
+  const d = dia.toLowerCase()
+  return musculos.value.filter(m => !gruposPorDia.value[d]?.includes(m))
 }
 
 function agregarGrupo(dia) {
-  const grupo = gruposDropdown.value[dia]
+  const d = dia.toLowerCase()
+  const grupo = gruposDropdown.value[d]
   if (!grupo) return
-  agregarGrupoManual(dia, grupo)
-  gruposDropdown.value[dia] = ''
-  rutinaGuardada.value[dia] = false
+  agregarGrupoManual(d, grupo)
+  gruposDropdown.value[d] = ''
+  rutinaGuardada.value[d] = false
 }
 
 function quitarGrupo(dia, grupo) {
-  gruposPorDia.value[dia] = gruposPorDia.value[dia].filter(x => x !== grupo)
-  delete ejerciciosSeleccionados.value[dia][grupo]
-  delete ejercicioTemporal.value[dia][grupo]
-  delete seriesTemporal.value[dia][grupo]
-  delete repeticionesTemporal.value[dia][grupo]
-  rutinaGuardada.value[dia] = false
+  const d = dia.toLowerCase()
+  gruposPorDia.value[d] = gruposPorDia.value[d].filter(x => x !== grupo)
+  delete ejerciciosSeleccionados.value[d][grupo]
+  delete ejercicioTemporal.value[d][grupo]
+  delete seriesTemporal.value[d][grupo]
+  delete repeticionesTemporal.value[d][grupo]
+  rutinaGuardada.value[d] = false
 }
 
 function agregarEjercicio(dia, grupo) {
-  const nombre = ejercicioTemporal.value[dia][grupo]
-  const series = parseInt(seriesTemporal.value[dia][grupo]) || 0
-  const repeticiones = parseInt(repeticionesTemporal.value[dia][grupo]) || 0
+  const d = dia.toLowerCase()
+  const nombre = ejercicioTemporal.value[d][grupo]
+  const series = parseInt(seriesTemporal.value[d][grupo]) || 0
+  const repeticiones = parseInt(repeticionesTemporal.value[d][grupo]) || 0
   if (!nombre || series <= 0 || repeticiones <= 0) return
-  const lista = ejerciciosSeleccionados.value[dia][grupo]
+  const lista = ejerciciosSeleccionados.value[d][grupo]
   if (!lista.find(e => e.nombre === nombre)) {
     lista.push({ nombre, series, repeticiones })
   }
-  ejercicioTemporal.value[dia][grupo] = ''
-  seriesTemporal.value[dia][grupo] = ''
-  repeticionesTemporal.value[dia][grupo] = ''
-  rutinaGuardada.value[dia] = false
+  ejercicioTemporal.value[d][grupo] = ''
+  seriesTemporal.value[d][grupo] = ''
+  repeticionesTemporal.value[d][grupo] = ''
+  rutinaGuardada.value[d] = false
 }
 
 function quitarEjercicio(dia, grupo, nombre) {
-  ejerciciosSeleccionados.value[dia][grupo] = ejerciciosSeleccionados.value[dia][grupo].filter(e => e.nombre !== nombre)
-  rutinaGuardada.value[dia] = false
+  const d = dia.toLowerCase()
+  ejerciciosSeleccionados.value[d][grupo] = ejerciciosSeleccionados.value[d][grupo].filter(e => e.nombre !== nombre)
+  rutinaGuardada.value[d] = false
 }
 
 function resumenDia(dia) {
-  return Object.keys(ejerciciosSeleccionados.value[dia] || {}).map(grupo => ({
-    id: `${dia}-${grupo}`,
+  const d = dia.toLowerCase()
+  return Object.keys(ejerciciosSeleccionados.value[d] || {}).map(grupo => ({
+    id: `${d}-${grupo}`,
     grupo,
-    ejercicios: ejerciciosSeleccionados.value[dia][grupo].map(e => `${e.nombre} (${e.series}x${e.repeticiones})`)
+    ejercicios: ejerciciosSeleccionados.value[d][grupo].map(e => `${e.nombre} (${e.series}x${e.repeticiones})`)
   }))
 }
 
-const diasMostrados = computed(() => {
-  if (diaIndexEditando.value !== null) return [diasSemana[diaIndexEditando.value]]
-  return diasSemana
-})
-
 const diasPendientes = computed(() =>
-  diasMostrados.value.filter(d => !rutinaGuardada.value[d])
+  diasMostrados.value.filter(d => !rutinaGuardada.value[d.toLowerCase()])
 )
 
-function guardarTodo() {
-  diasPendientes.value.forEach(d => guardarRutinaDia(d))
-  router.push(`/alumno/${alumno.value.email}`)
-}
-
 function rutinaDiaVacia(dia) {
-  const grupos = gruposPorDia.value[dia] || []
-  if (grupos.length === 0) return true
-  return grupos.every(grupo => (ejerciciosSeleccionados.value[dia][grupo]?.length ?? 0) === 0)
+  const d = dia.toLowerCase()
+  const grupos = gruposPorDia.value[d] || []
+  return grupos.length === 0 || grupos.every(grupo => (ejerciciosSeleccionados.value[d][grupo]?.length ?? 0) === 0)
 }
 
 function guardarRutinaDia(dia) {
-  const idxExistente = alumno.value.rutina.findIndex(r => r.dia === dia)
+  const d = dia.toLowerCase()
+  if (!Array.isArray(alumno.value.rutina)) alumno.value.rutina = []
 
-  if (rutinaDiaVacia(dia)) {
-    if (idxExistente !== -1) {
-      alumno.value.rutina.splice(idxExistente, 1)
-    }
+  const idxExistente = alumno.value.rutina.findIndex(r => r.dia.toLowerCase() === d)
+
+  if (rutinaDiaVacia(d)) {
+    if (idxExistente !== -1) alumno.value.rutina.splice(idxExistente, 1)
   } else {
     const nuevoDiaRutina = {
       dia,
-      descripcion: {}
+      descripcion: {},
+      hecho: false,
+      fecha: new Date().toISOString()
     }
-    gruposPorDia.value[dia].forEach(grupo => {
-      nuevoDiaRutina.descripcion[grupo] = ejerciciosSeleccionados.value[dia][grupo]
+
+    gruposPorDia.value[d].forEach(grupo => {
+      const ejercicios = ejerciciosSeleccionados.value[d][grupo]
+      if (ejercicios?.length) {
+        nuevoDiaRutina.descripcion[grupo] = ejercicios
+      }
     })
 
-    if (idxExistente !== -1) {
-      alumno.value.rutina[idxExistente] = {
-        ...alumno.value.rutina[idxExistente],
-        ...nuevoDiaRutina
+    if (Object.keys(nuevoDiaRutina.descripcion).length > 0) {
+      if (idxExistente !== -1) {
+        alumno.value.rutina[idxExistente] = { ...alumno.value.rutina[idxExistente], ...nuevoDiaRutina }
+      } else {
+        alumno.value.rutina.push(nuevoDiaRutina)
       }
-    } else {
-      alumno.value.rutina.push(nuevoDiaRutina)
     }
   }
 
@@ -352,8 +367,14 @@ function guardarRutinaDia(dia) {
     userStore.users[idxUser] = { ...alumno.value }
     userStore._guardarLocalStorage()
   }
+  rutinaGuardada.value[d] = true
+}
 
-  rutinaGuardada.value[dia] = true
+function guardarTodo() {
+  diasPendientes.value.forEach(d => guardarRutinaDia(d))
+  nextTick(() => {
+    router.push(`/alumno/${alumno.value.email}`)
+  })
 }
 
 function volverVistaAlumno() {

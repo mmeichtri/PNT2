@@ -2,6 +2,7 @@
   <div class="hero-full">
     <div class="hero-content">
       <h1 class="smartfit-neon">SMARTFIT</h1>
+      <p class="subtitulo-app">Tu plan de entrenamiento personalizado, guiado por tu entrenador</p>
       <router-link
         v-if="!userStore.loggedUser"
         to="/login"
@@ -90,6 +91,15 @@ function irASeleccionEntrenador() {
 .hero-content span {
   color: #ff4d4d;
 }
+
+
+.subtitulo-app {
+  color: #a3e635;
+  font-size: 0.5rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 4px #a3e635, 0 0 8px rgba(163, 230, 53, 0.4);
+}
+
 
 .hero-content p {
   font-size: 1.5rem;

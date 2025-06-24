@@ -1,177 +1,200 @@
 <template>
-  <div class="layout">
-    <div class="profile-container">
-      <div class="profile-card">
-        <img
-          class="avatar"
-          src="https://www.pngarts.com/files/3/Avatar-PNG-Pic.png"
-          alt="Avatar"
-        />
-        <h2 class="username">
-          {{ userStore.loggedUser.nombre }} {{ userStore.loggedUser.apellido }}
-        </h2>
-        <p class="role">{{ userStore.loggedUser.rol }}</p>
+  <div class="formPage">
+    <h1 class="subtitle">Formulario de datos, y selección de entrenador</h1>
+    <div class="formContainer">
+      <form @submit.prevent="guardar">
+        <div class="form-row">
+          <label>Nombre<input v-model="form.nombre" type="text" required /></label>
+          <label>Edad<input v-model.number="form.edad" type="number" min="1" required /></label>
+          <label>E‑mail<input v-model="form.email" type="email" required /></label>
+          <label>Peso (kg)<input v-model.number="form.peso" type="number" min="1" required /></label>
+        </div>
 
-        <div class="info">
-          <div class="form-row">
-            <input v-model="user.email" type="text" placeholder="Email" />
-          </div>
-          <div class="form-row">
-            <input v-model="user.edad" type="text" placeholder="Edad" />
-          </div>
-          <div class="form-row">
-            <input v-model="user.telefono" type="text" placeholder="Teléfono" />
-          </div>
+        <label class="full-width">
+          Objetivo
+          <textarea v-model="form.descripcion" rows="3" required></textarea>
+        </label>
 
-          <!-- ✅ Campo descripción corregido -->
-          <div class="form-row">
-            <input v-model="user.descripcion" type="text" placeholder="Descripción" />
-          </div>
+        <label class="full-width">
+          Entrenador disponible
+          <select v-model="form.entrenador" required>
+            <option disabled value="">Seleccioná un entrenador</option>
+            <option v-for="e in entrenadores" :key="e.email" :value="e.email">
+              {{ e.nombre }} {{ e.apellido }} ({{ e.email }})
+            </option>
+          </select>
+        </label>
 
-          <div class="form-row">
-            <select v-model="user.entrenadorAsignado" class="input-like" required>
-              <option disabled value="">Seleccioná un entrenador</option>
-              <option
-                v-for="e in entrenadores"
-                :key="e.email"
-                :value="e.email"
-              >
-                {{ e.nombre }} {{ e.apellido }} ({{ e.email }})
-              </option>
-            </select>
+        <!-- Vista previa del entrenador -->
+        <div v-if="entrenadorSeleccionado" class="preview-entrenador">
+          <div class="entrenador-info">
+            <img
+              v-if="entrenadorSeleccionado.imagen"
+              :src="entrenadorSeleccionado.imagen"
+              alt="Foto del entrenador"
+              class="entrenador-avatar"
+            />
+            <div>
+              <p><strong>Nombre:</strong> {{ entrenadorSeleccionado.nombre }} {{ entrenadorSeleccionado.apellido }}</p>
+              <p><strong>Email:</strong> {{ entrenadorSeleccionado.email }}</p>
+              <p v-if="entrenadorSeleccionado.descripcion">
+                <strong>Descripción:</strong> {{ entrenadorSeleccionado.descripcion }}
+              </p>
+              <p>
+                <strong>Personas que entrena:</strong>
+                {{ cantidadClientes[entrenadorSeleccionado.email] || 0 }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button class="btn-guardar" @click="guardar" type="submit">Guardar</button>
-        </div>
-      </div>
+        <button class="btn-guardar" type="submit">Guardar y continuar</button>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import { useRouter } from 'vue-router'
-import { reactive, computed } from 'vue'
 
-const userStore = useUserStore()
 const router = useRouter()
-
-const user = reactive({
-  ...userStore.loggedUser,
-  descripcion: userStore.loggedUser?.descripcion || ''
-})
-
-function guardar () {
-  const idx = userStore.users.findIndex(u => u.email === user.email)
-  if (idx !== -1) {
-    userStore.users[idx] = { ...user }
-    userStore.loggedUser = { ...user }
-    userStore._guardarLocalStorage()
-    alert('Perfil actualizado correctamente.')
-    router.push({ path: '/miPerfil' })
-  } else {
-    alert('Error: usuario no encontrado.')
-  }
-}
+const userStore = useUserStore()
 
 const entrenadores = computed(() =>
   userStore.users.filter(u => u.rol === 'entrenador')
 )
 
-const entrenadorActual = computed(() =>
-  entrenadores.value.find(e => e.email === user.entrenadorAsignado)
+const cantidadClientes = computed(() => {
+  const conteo = {}
+  userStore.users.forEach(u => {
+    if (u.rol === 'cliente' && u.entrenadorAsignado) {
+      conteo[u.entrenadorAsignado] = (conteo[u.entrenadorAsignado] || 0) + 1
+    }
+  })
+  return conteo
+})
+
+const form = ref({
+  nombre: userStore.loggedUser?.nombre + " " + userStore.loggedUser?.apellido || '',
+  edad: userStore.loggedUser?.edad || '',
+  email: userStore.loggedUser?.email || '',
+  peso: userStore.loggedUser?.peso || '',
+  descripcion: userStore.loggedUser?.descripcion || '',
+  entrenador: userStore.loggedUser?.entrenadorAsignado || ''
+})
+
+const entrenadorSeleccionado = computed(() =>
+  entrenadores.value.find(e => e.email === form.value.entrenador)
 )
 
-const otrosEntrenadores = computed(() =>
-  entrenadores.value.filter(e => e.email !== user.entrenadorAsignado)
-)
+function guardar () {
+  const datosActualizados = {
+    ...userStore.loggedUser,
+    ...form.value,
+    entrenadorAsignado: form.value.entrenador
+  }
+
+  userStore.login(datosActualizados)
+
+  userStore.asignarEntrenadorACliente(
+    datosActualizados.email,
+    datosActualizados.entrenadorAsignado
+  )
+
+  alert('Datos guardados correctamente ✅')
+  router.push('/')
+}
 </script>
 
 <style scoped>
-.layout {
+label {
   display: flex;
-  width: 100vw;
-  min-height: 100vh;
-}
-
-.profile-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-  background-color: var(--color-background-dark);
-  min-height: 100vh;
-}
-
-.profile-card {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-  text-align: center;
-}
-
-.avatar {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-}
-
-.form-row {
-  margin-bottom: 1rem;
-}
-
-.input-like {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f5f5f5;
-  color: #000;
-  transition: border-color 0.3s ease;
-}
-
-.input-like:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  background-color: #fff;
-}
-
-.username {
-  font-size: 1.8rem;
+  flex-direction: column;
   font-weight: 600;
-  margin: 0.5rem 0;
+  color: var(--color-text-light, #e5e5e5);
 }
 
-.role {
-  font-size: 1.5rem;
-  color: #666;
-  margin-bottom: 1.5rem;
+input,
+select,
+textarea {
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #ffffff;
+  color: #000;
 }
 
-.info {
-  font-size: 1.5rem;
-  text-align: left;
-  margin-bottom: 2rem;
+textarea {
+  resize: vertical;
+  min-height: 90px;
 }
 
-.info p {
-  margin: 0.5rem 0;
+.full-width {
+  grid-column: 1 / -1;
 }
 
 .btn-guardar {
-  padding: 8px 16px;
-  border-radius: 6px;
-  color: var(--color-text-light);
+  width: 200px;
+  height: 50px;
   background-color: var(--color-success);
-  transition: 0.2s;
+  color: var(--color-text-light);
+  font-size: 1rem;
+  border-radius: 1px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-guardar:hover {
+  background: #218838;
+}
+
+.formPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  background-color: #222;
+  padding-top: 10vh;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-entrenador {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e5e5e5;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.entrenador-info {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.entrenador-avatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #aaa;
 }
 </style>

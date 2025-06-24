@@ -24,9 +24,13 @@
           <h2 class="text-2xl font-semibold">Plan de entrenamiento</h2>
 
           <div class="flex gap-2 items-center">
-            <template v-if="diaTieneRutina">
-              <button class="btn-rutina" @click="verRutina">Ver rutina</button>
-            </template>
+            <button
+              v-if="diaTieneRutina && (!isTrainer || isTrainer)"
+              class="btn-rutina"
+              @click="verRutina"
+            >
+              Ver rutina
+            </button>
 
             <template v-if="isTrainer">
               <button

@@ -37,6 +37,7 @@
               <p><strong>Nombre:</strong> {{ entrenadorSeleccionado.nombre }} {{ entrenadorSeleccionado.apellido }}</p>
               <p><strong>Email:</strong> {{ entrenadorSeleccionado.email }}</p>
               <p v-if="entrenadorSeleccionado.descripcion"><strong>Descripción:</strong> {{ entrenadorSeleccionado.descripcion }}</p>
+              <p><strong>Personas que entrena:</strong> {{ cantidadClientes[entrenadorSeleccionado.email] || 0 }}</p>
             </div>
           </div>
         </div>
@@ -58,6 +59,17 @@ const userStore = useUserStore()
 const entrenadores = computed(() =>
   userStore.users.filter(u => u.rol === 'entrenador')
 )
+
+// Cantidad de clientes por entrenador
+const cantidadClientes = computed(() => {
+  const conteo = {}
+  userStore.users.forEach(u => {
+    if (u.rol === 'cliente' && u.entrenadorAsignado) {
+      conteo[u.entrenadorAsignado] = (conteo[u.entrenadorAsignado] || 0) + 1
+    }
+  })
+  return conteo
+})
 
 const form = ref({
   nombre: userStore.loggedUser?.nombre + " " + userStore.loggedUser?.apellido || '',
@@ -90,6 +102,7 @@ function guardar () {
   router.push('/')
 }
 </script>
+
 
 <style scoped>
 label {

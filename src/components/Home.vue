@@ -3,6 +3,14 @@
     <div class="hero-content">
       <h1 class="smartfit-neon">SMARTFIT</h1>
       <p class="subtitulo-app">Tu plan de entrenamiento personalizado, guiado por tu entrenador</p>
+
+      <p
+        v-if="isCliente && userStore.loggedUser?.entrenadorAsignado"
+        class="entrenador-asignado-text"
+      >
+        Ya tienes un entrenador asignado. Podés cambiarlo desde tu perfil.
+      </p>
+
       <router-link
         v-if="!userStore.loggedUser"
         to="/login"
@@ -19,15 +27,9 @@
       <p>Conectate con un profesional que te acompañe en tu proceso.</p>
       <button class="btn-elegir" @click="irASeleccionEntrenador">Elegir entrenador</button>
     </div>
-
-    <div
-      v-if="isCliente && userStore.loggedUser?.entrenadorAsignado"
-      class="entrenador-asignado-card"
-    >
-      <p>¡Ya tienes un entrenador asignado! Si quieres cambiarlo, puedes hacerlo desde tu perfil.</p>
-    </div>
-    </div>
+  </div>
 </template>
+
 
 <script setup>
 import { useUserStore } from '../stores/userStore'
@@ -77,6 +79,14 @@ function irASeleccionEntrenador() {
 .hero-content h1 {
   font-size: 3.5rem;
   margin-bottom: 1rem;
+}
+
+.entrenador-asignado-text {
+  color: #575353;
+  font-size: 0.4rem;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 2px rgba(59, 54, 54, 0.4);
 }
 
 .smartfit-neon {

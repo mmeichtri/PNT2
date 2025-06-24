@@ -339,10 +339,12 @@ function rutinaDiaVacia(dia) {
 }
 
 function guardarRutinaDia(dia) {
-  const d = normalizarDia(dia)
+  const d = normalizarDia(dia)  
+  
   if (!Array.isArray(alumno.value.rutina)) alumno.value.rutina = []
 
-  const idxExistente = alumno.value.rutina.findIndex(r => r.dia.toLowerCase() === d)
+   const idxExistente = alumno.value.rutina.findIndex(r => normalizarDia(r.dia) === d)
+
 
   if (rutinaDiaVacia(d)) {
     if (idxExistente !== -1) alumno.value.rutina.splice(idxExistente, 1)
@@ -363,7 +365,7 @@ function guardarRutinaDia(dia) {
 
     if (Object.keys(nuevoDiaRutina.descripcion).length > 0) {
       if (idxExistente !== -1) {
-        alumno.value.rutina[idxExistente] = { ...alumno.value.rutina[idxExistente], ...nuevoDiaRutina }
+        alumno.value.rutina[idxExistente] = nuevoDiaRutina
       } else {
         alumno.value.rutina.push(nuevoDiaRutina)
       }
@@ -373,12 +375,12 @@ function guardarRutinaDia(dia) {
   const idxUser = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (idxUser !== -1) {
     userStore.users[idxUser] = { ...alumno.value }
-    console.log(idxUser)
     userStore._guardarLocalStorage()
   }
-  console.log(rutinaGuardada)
+
   rutinaGuardada.value[d] = true
 }
+
 
 function guardarTodo() {
   diasPendientes.value.forEach(d => guardarRutinaDia(d))

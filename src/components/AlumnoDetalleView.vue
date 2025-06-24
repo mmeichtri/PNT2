@@ -47,8 +47,7 @@
           </div>
         </div>
 
-        <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400">
-        </div>
+        <div v-if="!isTrainer && sinRutinaAlumno" class="text-gray-400"></div>
 
         <div v-else>
           <ul class="dias-selector">
@@ -82,19 +81,9 @@
         <div class="mb-6 flex items-center gap-4">
           <div class="circular-progress" role="img" aria-label="Progreso total">
             <svg viewBox="0 0 36 36" class="circular-chart">
-              <path
-                class="circle-bg"
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                class="circle"
-                :stroke-dasharray="porcentajeProgreso + ', 100'"
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="circle" :stroke-dasharray="porcentajeProgreso + ', 100'"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
               <text x="18" y="20.35" class="percentage">{{ porcentajeProgreso }}%</text>
             </svg>
           </div>
@@ -110,11 +99,23 @@
             {{ item.fecha }} – {{ item.descripcion }}
           </li>
         </ul>
+
+        <div v-if="logrosDesbloqueados.length" class="logros-box">
+          <h3 class="text-lg font-bold text-green-200 mb-3 flex items-center gap-2">
+            🏅 Logros desbloqueados
+          </h3>
+          <ul class="space-y-1 text-sm text-green-100 pl-4 list-disc">
+            <li v-for="(logro, i) in logrosDesbloqueados" :key="'logro-' + i">
+              {{ logro }}
+            </li>
+          </ul>
+        </div>
       </section>
 
     </div>
   </section>
 </template>
+
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
@@ -242,7 +243,7 @@ async function cargarAlumno() {
       const hoy = new Date()
       const diaSemana = hoy.getDay() // 0: domingo ... 6: sábado
       const lunes = new Date(hoy)
-      lunes.setDate(hoy.getDate() - ((diaSemana + 6) % 7)) // ir al lunes
+      lunes.setDate(hoy.getDate() - ((diaSemana + 6) % 7)) 
 
       const dias = []
       for (let i = 0; i < 7; i++) {
@@ -298,6 +299,34 @@ onMounted(() => {
 watch(() => route.fullPath, () => {
   cargarAlumno()
 })
+
+const logrosDesbloqueados = computed(() => {
+  const completados = alumno.value.rutina.filter(d => !d.esPlaceholder && d.hecho)
+  const diasSeguidos = contarDiasSeguidos(alumno.value.rutina)
+  const totalMes = completados.length >= 28
+  const totalDiez = completados.length >= 10
+
+  const logros = []
+  if (diasSeguidos >= 5) logros.push('🎖 5 días seguidos cumplidos, seguí asi!')
+  if (totalMes) logros.push('🏆 Primer mes completo, vas por buen camino!')
+  if (totalDiez) logros.push('🔁 10 rutinas seguidas, lo estas haciendo muy bien!')
+  return logros
+})
+
+function contarDiasSeguidos(rutina) {
+  const fechas = rutina
+    .filter(r => !r.esPlaceholder && r.hecho && r.fechaOriginal)
+    .map(r => new Date(r.fechaOriginal).setHours(0, 0, 0, 0))
+    .sort((a, b) => a - b)
+
+  let max = 1, actual = 1
+  for (let i = 1; i < fechas.length; i++) {
+    const diff = (fechas[i] - fechas[i - 1]) / (1000 * 60 * 60 * 24)
+    actual = diff === 1 ? actual + 1 : 1
+    if (actual > max) max = actual
+  }
+  return max
+}
 </script>
 
 
@@ -313,6 +342,26 @@ watch(() => route.fullPath, () => {
   font-weight: 600;
   transition: 0.2s;
   border: none;
+}
+
+.logros-box {
+  background: rgba(22, 101, 52, 0.6); /* verde oscuro semi-transparente */
+  border: 1px solid #22c55e;          /* verde brillante */
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+.logros-box h3 {
+  color: #bbf7d0; /* verde claro */
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+.logros-box ul {
+  color: #d1fae5;
+  font-size: 0.9rem;
+  padding-left: 1.5rem;
+  list-style: disc;
 }
 
 .btn-rutina{ 

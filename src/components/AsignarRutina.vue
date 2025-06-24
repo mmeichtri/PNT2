@@ -68,45 +68,52 @@
             </div>
 
             <template v-if="!rutinaGuardada[normalizarDia(dia)] && !ejerciciosSeleccionados[normalizarDia(dia)][grupo].length">
-              <div class="inline-field mb-2">
-                <select
-                  v-model="ejercicioTemporal[normalizarDia(dia)][grupo]"
-                  class="select-field"
+            <div class="inline-field mb-2">
+              <select
+                v-model="ejercicioTemporal[normalizarDia(dia)][grupo]"
+                class="select-field"
+              >
+                <option value="" disabled selected>Elegí un ejercicio…</option>
+                <option
+                  v-for="nombre in ejerciciosPorGrupo[grupo]"
+                  :key="nombre"
+                  :value="nombre"
                 >
-                  <option value="" disabled selected>Elegí un ejercicio…</option>
-                  <option
-                    v-for="nombre in ejerciciosPorGrupo[grupo]"
-                    :key="nombre"
-                    :value="nombre"
-                  >
-                    {{ nombre }}
-                  </option>
-                </select>
+                  {{ nombre }}
+                </option>
+              </select>
 
-                <input
-                  type="number"
-                  min="1"
-                  v-model="seriesTemporal[normalizarDia(dia)][grupo]"
-                  class="input-mini"
-                  placeholder="Series"
-                />
-                <input
-                  type="number"
-                  min="1"
-                  v-model="repeticionesTemporal[normalizarDia(dia)][grupo]"
-                  class="input-mini"
-                  placeholder="Reps"
-                />
+              <input
+                type="number"
+                min="1"
+                v-model="seriesTemporal[normalizarDia(dia)][grupo]"
+                class="input-mini"
+                placeholder="Series"
+              />
+              <input
+                type="number"
+                min="1"
+                v-model="repeticionesTemporal[normalizarDia(dia)][grupo]"
+                class="input-mini"
+                placeholder="Reps"
+              />
 
-                <button
-                  type="button"
-                  class="btn-add"
-                  @click="agregarEjercicio(dia, grupo)"
-                >
-                  Añadir
-                </button>
-              </div>
-            </template>
+              <button
+                type="button"
+                class="btn-add"
+                @click="agregarEjercicio(dia, grupo)"
+              >
+                Añadir
+              </button>
+            </div>
+
+            <p
+              v-if="errorTemporal[normalizarDia(dia)][grupo]"
+              class="text-red-400 text-xs ml-1"
+            >
+              {{ errorTemporal[normalizarDia(dia)][grupo] }}
+            </p>
+          </template>
 
             <ul
               v-if="ejerciciosSeleccionados[normalizarDia(dia)][grupo]?.length"
@@ -168,6 +175,7 @@ const rutinaGuardada = ref({})
 const cargandoEjercicios = ref({})
 const errorEjercicios = ref({})
 const diaIndexEditando = ref(null)
+const errorTemporal = ref({})
 
 function initDia(dia) {
   const diaNormalizado = normalizarDia(dia)
@@ -178,6 +186,7 @@ function initDia(dia) {
   seriesTemporal.value[diaNormalizado] = {}
   repeticionesTemporal.value[diaNormalizado] = {}
   rutinaGuardada.value[diaNormalizado] = false
+  errorTemporal.value[diaNormalizado] = {}
 }
 
 function normalizarDia(dia) {
@@ -192,7 +201,6 @@ diasSemana.forEach(initDia)
 onMounted(() => {
   cargarMusculos()
   cargarAlumno().then(() => {
-    // Generar fechas para todos los días mostrados
     diasSemana.forEach((dia, idx) => {
       const d = normalizarDia(dia)
       const yaExiste = alumno.value.rutina?.some(r => normalizarDia(r.dia) === d)
@@ -324,14 +332,22 @@ function agregarEjercicio(dia, grupo) {
   const nombre = ejercicioTemporal.value[d][grupo]
   const series = parseInt(seriesTemporal.value[d][grupo]) || 0
   const repeticiones = parseInt(repeticionesTemporal.value[d][grupo]) || 0
-  if (!nombre || series <= 0 || repeticiones <= 0) return
+
+  if (!nombre || series <= 0 || repeticiones <= 0) {
+    errorTemporal.value[d][grupo] = 'Completá todos los campos correctamente.'
+    return
+  }
+
   const lista = ejerciciosSeleccionados.value[d][grupo]
   if (!lista.find(e => e.nombre === nombre)) {
     lista.push({ nombre, series, repeticiones })
   }
+
   ejercicioTemporal.value[d][grupo] = ''
   seriesTemporal.value[d][grupo] = ''
   repeticionesTemporal.value[d][grupo] = ''
+  errorTemporal.value[d][grupo] = ''
+
   rutinaGuardada.value[d] = false
 }
 
@@ -354,12 +370,10 @@ function fechaDeDia(dia) {
   const d = normalizarDia(dia)
   const rutina = alumno.value.rutina?.find(r => normalizarDia(r.dia) === d)
 
-  // Si ya existe una fecha guardada, usala
   if (rutina?.fecha) {
     return new Date(rutina.fecha).toLocaleDateString('es-AR')
   }
 
-  // Si no, generala en base al índice del día
   const idx = diasSemana.findIndex(nombre => normalizarDia(nombre) === d)
   if (idx !== -1) {
     const hoy = new Date()

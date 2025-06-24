@@ -26,11 +26,11 @@
             </ul>
           </div>
 
-          <template v-if="!rutinaGuardada[dia]">
+          <template v-if="!rutinaGuardada[normalizarDia(dia)]">
             <div class="inline-field mb-4">
               <label class="text-sm font-medium">Grupos musculares</label>
               <select
-                v-model="gruposDropdown[dia]"
+                v-model="gruposDropdown[normalizarDia(dia)]"
                 @change="agregarGrupo(dia)"
                 class="select-field"
               >
@@ -48,11 +48,11 @@
           </template>
 
           <div
-            v-for="grupo in gruposPorDia[dia]"
+            v-for="grupo in gruposPorDia[normalizarDia(dia)]"
             :key="grupo"
             class="grupo-card"
           >
-            <div class="inline-field mb-2" v-if="!rutinaGuardada[dia] && !ejerciciosSeleccionados[dia][grupo].length">
+            <div class="inline-field mb-2" v-if="!rutinaGuardada[normalizarDia(dia)] && !ejerciciosSeleccionados[normalizarDia(dia)][grupo].length">
               <h4 class="font-medium capitalize">{{ grupo }}</h4>
               <button
                 type="button"
@@ -63,10 +63,10 @@
               </button>
             </div>
 
-            <template v-if="!rutinaGuardada[dia] && !ejerciciosSeleccionados[dia][grupo].length">
+            <template v-if="!rutinaGuardada[normalizarDia(dia)] && !ejerciciosSeleccionados[normalizarDia(dia)][grupo].length">
               <div class="inline-field mb-2">
                 <select
-                  v-model="ejercicioTemporal[dia][grupo]"
+                  v-model="ejercicioTemporal[normalizarDia(dia)][grupo]"
                   class="select-field"
                 >
                   <option value="" disabled selected>Elegí un ejercicio…</option>
@@ -82,14 +82,14 @@
                 <input
                   type="number"
                   min="1"
-                  v-model="seriesTemporal[dia][grupo]"
+                  v-model="seriesTemporal[normalizarDia(dia)][grupo]"
                   class="input-mini"
                   placeholder="Series"
                 />
                 <input
                   type="number"
                   min="1"
-                  v-model="repeticionesTemporal[dia][grupo]"
+                  v-model="repeticionesTemporal[normalizarDia(dia)][grupo]"
                   class="input-mini"
                   placeholder="Reps"
                 />
@@ -105,17 +105,17 @@
             </template>
 
             <ul
-              v-if="ejerciciosSeleccionados[dia][grupo]?.length"
+              v-if="ejerciciosSeleccionados[normalizarDia(dia)][grupo]?.length"
               class="tags-wrapper"
             >
               <li
-                v-for="e in ejerciciosSeleccionados[dia][grupo]"
+                v-for="e in ejerciciosSeleccionados[normalizarDia(dia)][grupo]"
                 :key="e.nombre"
                 class="tag-item"
               >
                 {{ e.nombre }} ({{ e.series }}x{{ e.repeticiones }})
                 <button
-                  v-if="!rutinaGuardada[dia]"
+                  v-if="!rutinaGuardada[normalizarDia(dia)]"
                   type="button"
                   class="hover:text-yellow-300"
                   @click="quitarEjercicio(dia, grupo, e.nombre)"
@@ -174,6 +174,13 @@ function initDia(dia) {
   seriesTemporal.value[diaNormalizado] = {}
   repeticionesTemporal.value[diaNormalizado] = {}
   rutinaGuardada.value[diaNormalizado] = false
+}
+
+function normalizarDia(dia) {
+  return dia
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
 }
 
 diasSemana.forEach(initDia)
@@ -365,8 +372,10 @@ function guardarRutinaDia(dia) {
   const idxUser = userStore.users.findIndex(u => u.email === alumno.value.email)
   if (idxUser !== -1) {
     userStore.users[idxUser] = { ...alumno.value }
+    console.log(idxUser)
     userStore._guardarLocalStorage()
   }
+  console.log(rutinaGuardada)
   rutinaGuardada.value[d] = true
 }
 

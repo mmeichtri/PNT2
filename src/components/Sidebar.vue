@@ -17,8 +17,9 @@ const menuItems = computed(() => {
   } else if (rol === 'cliente') {
     return [
       { name: 'Mi perfil', route: 'MiPerfil', icon: '👤', routeName: 'MiPerfil' },
-      { name: 'Calendario', route: `/alumno/${email}`, icon: '📅', routeName: 'AlumnoDetalleView' },
-      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'ProgresoAlu' },
+      { name: 'Calendario', route: 'Clients', icon: '📅', routeName: 'Clients' },
+      { name: 'Mi plan', route: `/alumno/${email}`, icon: '📋', routeName: 'AlumnoDetalleView' },
+      { name: 'Progreso', route: 'Progreso', icon: '📈', routeName: 'VistaProgresoAlumno' },
     ]
   } else if (rol === 'admin') {
     return [
@@ -74,7 +75,7 @@ function goToRoute(routeName) {
         <div class="divider"></div>
       </div>
     </transition>
-
+<div class="menu-scroll">
     <ul class="section-list">
  <li 
           v-for="(item, index) in menuItems" 
@@ -87,6 +88,7 @@ function goToRoute(routeName) {
     <span v-if="!isCollapsed" class="section-text">{{ item.name }}</span>
       </li>
     </ul>
+    </div>
   </div>
 </template>
 
@@ -132,6 +134,7 @@ function goToRoute(routeName) {
   position: fixed;
   top: 0;
   right: 0;
+   overflow-y: auto;
   background-color: rgba(30, 30, 30, 0.95); 
   backdrop-filter: blur(10px);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
@@ -141,8 +144,8 @@ function goToRoute(routeName) {
 
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   margin: 1.5rem auto;
   border-radius: 50%;
   overflow: hidden;
@@ -151,7 +154,7 @@ function goToRoute(routeName) {
 
 .avatar img {
   width: 100%;
-  height: 100%;
+  height: 80%;
   object-fit: cover;
   display: block;
 }
@@ -188,14 +191,14 @@ function goToRoute(routeName) {
 }
 
 .listItemSidebar {
- display: flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
   color: #fff;
-  font-size: 1.2rem;
-  margin-bottom: 8px;
+  font-size: 1rem;
+  margin-bottom: 6px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -213,6 +216,12 @@ function goToRoute(routeName) {
   display: none;
 }
 .icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.menu-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-top: 1rem;
 }
 </style>

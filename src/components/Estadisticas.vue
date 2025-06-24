@@ -39,11 +39,15 @@ const alumnosConRutinas = computed(() => {
     .filter(u => u.rol === 'cliente')
     .map(u => ({
       nombre: u.nombre,
-      rutinas: u.rutinasCompletadas?.length || 0
+      rutinas: u.rutinasHechas || 0
     }))
     .sort((a, b) => b.rutinas - a.rutinas)
     .slice(0, 5)
 })
+
+
+
+
 
 const dataAlumnos = computed(() => ({
   labels: alumnosConRutinas.value.map(a => a.nombre),
@@ -60,13 +64,14 @@ const dataAlumnos = computed(() => ({
 const entrenadoresActivos = computed(() =>
   entrenadores.value.map(ent => {
     const alumnos = userStore.alumnosDe(ent.email)
-    const activos = alumnos.filter(a => (a.rutinasCompletadas?.length || 0) > 0)
+    const activos = alumnos.filter(a => (a.rutinasHechas || 0) > 0)
     return {
       nombre: ent.nombre,
       activos: activos.length
     }
   })
 )
+
 
 const dataActivos = computed(() => ({
   labels: entrenadoresActivos.value.map(e => e.nombre),

@@ -99,8 +99,7 @@
           <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
-        <ul class="space-y-2" v-if="alumno.progreso.length > 0">
-          <li
+<ul class="space-y-2" v-if="alumno.progreso?.length > 0">          <li
             v-for="(item, i) in alumno.progreso"
             :key="'prog-'+i"
             class="p-3 border-l-4 border-green-500 bg-green-50 rounded text-gray-800"
@@ -178,6 +177,8 @@ function modificarRutinaDia() {
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
 
+
+
 function verRutina() {
   router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
@@ -201,9 +202,12 @@ function guardarEstadoDia() {
 }
 
 function marcarComoHecho() {
-  diaSeleccionado.value.hecho = true
+  alumno.value = { ...alumno.value }
+  alumno.value.rutina[selectedDiaIndex.value].hecho = true
   guardarEstadoDia()
+  userStore.sumarRutinaHecha(alumno.value.email)
 }
+
 
 async function cargarAlumno() {
   cargando.value = true

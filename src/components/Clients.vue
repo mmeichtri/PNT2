@@ -36,16 +36,16 @@ import 'vue-cal/dist/vuecal.css'
 const userStore = useUserStore()
 const router = useRouter()
 
-//CAMBIAR ESTO PARA QUE LAS RUTINAS VENGAN DE PINIA
-/*
 const events = ref([
   { start: new Date('2025-06-25T10:00:00'), title: 'Rutina 1' },
   { start: new Date('2025-06-28T18:00:00'), title: 'Rutina 2' },
 ])
 
-const rutinasActivas = computed(() =>
-  rutinas.value.length
-)
+const rutinasActivas = computed(() => {
+  const r = userStore.loggedUser?.rutina || []
+  return r.filter(r => !r.esPlaceholder).length
+})
+
 
 const now = ref(new Date())
 
@@ -72,7 +72,7 @@ const timeLeft = computed(() => {
 
   return str
 })
-*/
+
 
 </script>
 

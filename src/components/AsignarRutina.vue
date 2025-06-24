@@ -12,9 +12,11 @@
           class="form-card"
         >
           <h3 class="dia-header">Ejercicios</h3>
+          <p class="text-xs text-gray-300 mb-2 ml-2">Fecha: {{ fechaDeDia(dia) }}</p>
 
-          <div v-if="resumenDia(dia).length" class="mb-4">
-            <ul class="space-y-1 ml-2">
+
+          <div class="mb-4">
+            <ul v-if="resumenDia(dia).length" class="space-y-1 ml-2">
               <li
                 v-for="item in resumenDia(dia)"
                 :key="item.id"
@@ -24,7 +26,9 @@
                 {{ item.ejercicios.join(', ') || '—' }}
               </li>
             </ul>
+            <p v-else class="text-xs text-gray-400 ml-2">Sin ejercicios asignados.</p>
           </div>
+
 
           <template v-if="!rutinaGuardada[normalizarDia(dia)]">
             <div class="inline-field mb-4">
@@ -187,7 +191,25 @@ diasSemana.forEach(initDia)
 
 onMounted(() => {
   cargarMusculos()
-  cargarAlumno()
+  cargarAlumno().then(() => {
+    // Generar fechas para todos los días mostrados
+    diasSemana.forEach((dia, idx) => {
+      const d = normalizarDia(dia)
+      const yaExiste = alumno.value.rutina?.some(r => normalizarDia(r.dia) === d)
+      if (!yaExiste) {
+        const fecha = new Date()
+        fecha.setDate(fecha.getDate() + idx)
+        alumno.value.rutina.push({
+          dia,
+          descripcion: {},
+          hecho: false,
+          fecha: fecha.toISOString()
+        })
+      }
+    })
+
+    userStore._guardarLocalStorage()
+  })
 })
 
 async function cargarMusculos() {
@@ -328,6 +350,27 @@ function resumenDia(dia) {
   }))
 }
 
+function fechaDeDia(dia) {
+  const d = normalizarDia(dia)
+  const rutina = alumno.value.rutina?.find(r => normalizarDia(r.dia) === d)
+
+  // Si ya existe una fecha guardada, usala
+  if (rutina?.fecha) {
+    return new Date(rutina.fecha).toLocaleDateString('es-AR')
+  }
+
+  // Si no, generala en base al índice del día
+  const idx = diasSemana.findIndex(nombre => normalizarDia(nombre) === d)
+  if (idx !== -1) {
+    const hoy = new Date()
+    hoy.setDate(hoy.getDate() + idx)
+    return hoy.toLocaleDateString('es-AR')
+  }
+
+  return '—'
+}
+
+
 const diasPendientes = computed(() =>
   diasMostrados.value.filter(d => !rutinaGuardada.value[d.toLowerCase()])
 )
@@ -340,20 +383,22 @@ function rutinaDiaVacia(dia) {
 
 function guardarRutinaDia(dia) {
   const d = normalizarDia(dia)  
-  
+
   if (!Array.isArray(alumno.value.rutina)) alumno.value.rutina = []
 
-   const idxExistente = alumno.value.rutina.findIndex(r => normalizarDia(r.dia) === d)
-
+  const idxExistente = alumno.value.rutina.findIndex(r => normalizarDia(r.dia) === d)
 
   if (rutinaDiaVacia(d)) {
     if (idxExistente !== -1) alumno.value.rutina.splice(idxExistente, 1)
   } else {
+    const fechaBase = new Date()
+    fechaBase.setDate(fechaBase.getDate() + diasSemana.indexOf(dia))
+
     const nuevoDiaRutina = {
       dia,
       descripcion: {},
       hecho: false,
-      fecha: new Date().toISOString()
+      fecha: fechaBase.toISOString()
     }
 
     gruposPorDia.value[d].forEach(grupo => {
@@ -380,6 +425,7 @@ function guardarRutinaDia(dia) {
 
   rutinaGuardada.value[d] = true
 }
+
 
 
 function guardarTodo() {

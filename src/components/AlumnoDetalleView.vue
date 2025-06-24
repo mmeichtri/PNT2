@@ -58,10 +58,12 @@
                 :class="{ 'dia-pill--activo': idx === selectedDiaIndex }"
                 @click="selectDia(idx)"
               >
+                <span class="dia-pill-fecha">
+                  {{ formatearFecha(diaRutina.fechaOriginal) }}
+                </span>
                 <span class="dia-pill-dia">
                   {{ esHoy(diaRutina) ? 'Hoy ' + abreviarDia(diaRutina.dia) : abreviarDia(diaRutina.dia) }}
                 </span>
-                <span class="dia-pill-fecha">{{ diaRutina.diaNumero }}</span>
               </button>
             </li>
           </ul>
@@ -99,7 +101,8 @@
           <p class="text-sm text-gray-300">{{ porcentajeProgreso }}% completado</p>
         </div>
 
-<ul class="space-y-2" v-if="alumno.progreso?.length > 0">          <li
+        <ul class="space-y-2" v-if="alumno.progreso?.length > 0"> 
+          <li
             v-for="(item, i) in alumno.progreso"
             :key="'prog-'+i"
             class="p-3 border-l-4 border-green-500 bg-green-50 rounded text-gray-800"
@@ -157,11 +160,18 @@ function esHoy(diaRutina) {
   )
 }
 
+function fechaCompleta(diaRutina) {
+  if (!diaRutina?.fechaOriginal) return ''
+  const fecha = new Date(diaRutina.fechaOriginal)
+  const opciones = { weekday: 'long', day: '2-digit', month: '2-digit' }
+  return fecha.toLocaleDateString('es-AR', opciones)
+}
+
 function selectDia(idx) { selectedDiaIndex.value = idx }
 
 function formatearFecha(fechaISO) {
   if (!fechaISO) return '--'
-  const fecha = new Date(fechaISO)
+  const fecha = new Date(typeof fechaISO === 'string' ? fechaISO : fechaISO.toISOString())
   return fecha.getDate().toString().padStart(2, '0')
 }
 
@@ -176,8 +186,6 @@ function modificarRutinaDia() {
   }
   router.push(`/asignarRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
 }
-
-
 
 function verRutina() {
   router.push(`/verRutina/${alumno.value.email}/${selectedDiaIndex.value}`)
@@ -208,13 +216,13 @@ function marcarComoHecho() {
   userStore.sumarRutinaHecha(alumno.value.email)
 }
 
-
 async function cargarAlumno() {
   cargando.value = true
   await userStore.loadUserFromStorage()
 
   const email = route.params.email
   const encontrado = userStore.users.find(u => u.email === email)
+
   if (encontrado) {
     const rutinaMapeada = (encontrado.rutina || []).map(d => {
       const nombreDia = d.dia ?? obtenerNombreDia(d.fecha)
@@ -227,14 +235,35 @@ async function cargarAlumno() {
       }
     })
 
-    const diasSemana = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']
-    const rutinaCompleta = diasSemana.map(diaTexto => {
-      const existente = rutinaMapeada.find(r => r.dia.toLowerCase() === diaTexto)
+    // Normalizador para comparar sin acentos ni mayúsculas
+    const normalizar = str => str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase()
+
+    function obtenerFechasSemanaActual() {
+      const hoy = new Date()
+      const diaSemana = hoy.getDay() // 0: domingo ... 6: sábado
+      const lunes = new Date(hoy)
+      lunes.setDate(hoy.getDate() - ((diaSemana + 6) % 7)) // ir al lunes
+
+      const dias = []
+      for (let i = 0; i < 7; i++) {
+        const fecha = new Date(lunes)
+        fecha.setDate(lunes.getDate() + i)
+        dias.push(fecha)
+      }
+      return dias
+    }
+
+    const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
+    const fechasSemana = obtenerFechasSemanaActual()
+
+    const rutinaCompleta = diasSemana.map((diaTexto, i) => {
+      const fecha = fechasSemana[i]
+      const existente = rutinaMapeada.find(r => normalizar(r.dia) === normalizar(diaTexto))
       return existente ?? {
         dia: diaTexto,
-        diaNumero: '--',
+        diaNumero: formatearFecha(fecha.toISOString()),
         hecho: false,
-        fechaOriginal: null,
+        fechaOriginal: fecha.toISOString(),
         esPlaceholder: true
       }
     })
@@ -246,8 +275,10 @@ async function cargarAlumno() {
   } else {
     alumno.value = { email: '' }
   }
+
   cargando.value = false
 }
+
 
 const isTrainer        = computed(() => userStore.loggedUser?.rol === 'entrenador')
 const diaTieneRutina   = computed(() => diaSeleccionado.value && !diaSeleccionado.value.esPlaceholder)
@@ -268,6 +299,7 @@ watch(() => route.fullPath, () => {
   cargarAlumno()
 })
 </script>
+
 
 
 <style scoped>
@@ -362,18 +394,29 @@ watch(() => route.fullPath, () => {
 .dia-pill:hover{ 
   transform:translateY(-2px); 
 }
-.dia-pill-dia{ 
-  font-size:.85rem;font-weight:600;color:#d1d5db;
+.dia-pill-dia {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #d1d5db;
+  line-height: 1.1;
+  text-align: center;
 }
-.dia-pill-fecha{ 
-  width:34px;height:34px;border-radius:50%;
-  background:#777;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;color:#fff;
-  font-size:.85rem;
+
+.dia-pill-fecha {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.75rem; 
+  text-align: center;
+  line-height: 1.1;
 }
+
 .dia-pill--activo{ 
   background:#c5ff5d;
   transform:scale(1.05);

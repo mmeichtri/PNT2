@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Detalle del Alumno</h1>
+    <!-- <h1>Detalle del Alumno</h1> -->
     <ProgresoAlumno :alumno="alumno" />
     
   </div>

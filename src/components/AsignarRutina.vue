@@ -166,7 +166,7 @@ const errorEjercicios = ref({})
 const diaIndexEditando = ref(null)
 
 function initDia(dia) {
-  const diaNormalizado = dia.toLowerCase()
+  const diaNormalizado = normalizarDia(dia)
   gruposPorDia.value[diaNormalizado] = []
   gruposDropdown.value[diaNormalizado] = ''
   ejerciciosSeleccionados.value[diaNormalizado] = {}
@@ -232,12 +232,13 @@ const diasMostrados = computed(() => {
 })
 
 async function agregarGrupoManual(dia, grupo, ejercicios = []) {
-  if (!gruposPorDia.value[dia].includes(grupo)) {
-    gruposPorDia.value[dia].push(grupo)
-    ejerciciosSeleccionados.value[dia][grupo] = ejercicios
-    ejercicioTemporal.value[dia][grupo] = ''
-    seriesTemporal.value[dia][grupo] = ''
-    repeticionesTemporal.value[dia][grupo] = ''
+  const d = normalizarDia(dia)
+  if (!gruposPorDia.value[d].includes(grupo)) {
+    gruposPorDia.value[d].push(grupo)
+    ejerciciosSeleccionados.value[d][grupo] = ejercicios
+    ejercicioTemporal.value[d][grupo] = ''
+    seriesTemporal.value[d][grupo] = ''
+    repeticionesTemporal.value[d][grupo] = ''
     await cargarEjercicios(grupo)
   }
 }
@@ -273,12 +274,12 @@ async function cargarEjercicios(grupo) {
 }
 
 function gruposDisponibles(dia) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   return musculos.value.filter(m => !gruposPorDia.value[d]?.includes(m))
 }
 
 function agregarGrupo(dia) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   const grupo = gruposDropdown.value[d]
   if (!grupo) return
   agregarGrupoManual(d, grupo)
@@ -287,7 +288,7 @@ function agregarGrupo(dia) {
 }
 
 function quitarGrupo(dia, grupo) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   gruposPorDia.value[d] = gruposPorDia.value[d].filter(x => x !== grupo)
   delete ejerciciosSeleccionados.value[d][grupo]
   delete ejercicioTemporal.value[d][grupo]
@@ -297,7 +298,7 @@ function quitarGrupo(dia, grupo) {
 }
 
 function agregarEjercicio(dia, grupo) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   const nombre = ejercicioTemporal.value[d][grupo]
   const series = parseInt(seriesTemporal.value[d][grupo]) || 0
   const repeticiones = parseInt(repeticionesTemporal.value[d][grupo]) || 0
@@ -313,13 +314,13 @@ function agregarEjercicio(dia, grupo) {
 }
 
 function quitarEjercicio(dia, grupo, nombre) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   ejerciciosSeleccionados.value[d][grupo] = ejerciciosSeleccionados.value[d][grupo].filter(e => e.nombre !== nombre)
   rutinaGuardada.value[d] = false
 }
 
 function resumenDia(dia) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   return Object.keys(ejerciciosSeleccionados.value[d] || {}).map(grupo => ({
     id: `${d}-${grupo}`,
     grupo,
@@ -332,13 +333,13 @@ const diasPendientes = computed(() =>
 )
 
 function rutinaDiaVacia(dia) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   const grupos = gruposPorDia.value[d] || []
   return grupos.length === 0 || grupos.every(grupo => (ejerciciosSeleccionados.value[d][grupo]?.length ?? 0) === 0)
 }
 
 function guardarRutinaDia(dia) {
-  const d = dia.toLowerCase()
+  const d = normalizarDia(dia)
   if (!Array.isArray(alumno.value.rutina)) alumno.value.rutina = []
 
   const idxExistente = alumno.value.rutina.findIndex(r => r.dia.toLowerCase() === d)

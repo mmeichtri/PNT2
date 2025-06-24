@@ -7,7 +7,7 @@ const userStore = useUserStore()
 
 <template>
   <div class="admin-page">
-    <h2>📊 Estadísticas del sistema</h2>
+    <!-- <h2>📊 Estadísticas del sistema</h2> -->
     <EstadisticasChart />
 
     <div v-if="userStore.entrenadorConMasAlumnos">

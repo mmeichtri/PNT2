@@ -105,37 +105,76 @@ const options = {
 </script>
 
 <template>
-  <div class="chart-grid">
-    <div class="chart-container">
-      <h2>Alumnos por entrenador</h2>
-      <Bar :data="dataEntrenadores" :options="options" />
-    </div>
+  <div class="chart-wrapper">
+    <!-- 🌟 Título principal -->
+    <h1 class="titulo-principal">Estadísticas del sistema</h1>
 
-    <div class="chart-container">
-      <h2>Alumnos con más rutinas completadas</h2>
-      <Bar :data="dataAlumnos" :options="options" />
-    </div>
+    <div class="chart-grid">
+      <!-- 📊 Gráfico 1 -->
+      <div class="chart-container">
+        <h2 class="subtitulo">Alumnos por entrenador</h2>
+        <Bar :data="dataEntrenadores" :options="options" />
+      </div>
 
-    <div class="chart-container">
-      <h2>Entrenadores con más alumnos activos</h2>
-      <Bar :data="dataActivos" :options="options" />
+      <!-- 📊 Gráfico 2 -->
+      <div class="chart-container">
+        <h2 class="subtitulo">Alumnos con más rutinas completadas</h2>
+        <Bar :data="dataAlumnos" :options="options" />
+      </div>
+
+      <!-- 📊 Gráfico 3 -->
+      <div class="chart-container">
+        <h2 class="subtitulo">Entrenadores con más alumnos activos</h2>
+        <Bar :data="dataActivos" :options="options" />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.chart-wrapper {
+  min-height: 100vh;
+  background-color: #222;
+  padding: 2rem;
+  color: white;
+}
+
+/* 🎯 Título principal con efecto neón */
+.titulo-principal {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #bfff00;
+  text-shadow: 0 0 8px #bfff00;
+  margin-bottom: 3rem;
+}
+
+/* ✅ Subtítulos verdes más chicos */
+.subtitulo {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #aaff00;
+  text-shadow: 0 0 4px #aaff00;
+  margin-bottom: 1rem;
+}
+
+/* 🎨 Contenedor de gráficos */
 .chart-grid {
   display: flex;
   flex-direction: column;
   gap: 40px;
-  padding: 2rem;
   align-items: center;
 }
 
+/* 🧱 Tarjetas de gráficos */
 .chart-container {
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   height: 300px;
+  background-color: #111;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #444;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
 }
 </style>
-

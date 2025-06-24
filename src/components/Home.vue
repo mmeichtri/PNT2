@@ -1,6 +1,7 @@
 <template>
   <div class="hero-full">
     <div class="hero-content">
+      <h1 class="smartfit-neon">SMARTFIT</h1>
       <router-link
         v-if="!userStore.loggedUser"
         to="/login"
@@ -75,6 +76,15 @@ function irASeleccionEntrenador() {
 .hero-content h1 {
   font-size: 3.5rem;
   margin-bottom: 1rem;
+}
+
+.smartfit-neon {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #bfff00;
+  text-shadow: 0 0 10px #bfff00, 0 0 20px #bfff00, 0 0 30px #bfff00;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .hero-content span {
